@@ -1,0 +1,1 @@
+try{window.addEventListener('load',()=>{try{gcklBoardSyncMarkerState();}catch(e){}});}catch(e){}

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NurseKit – Klinik Hasta Simülatörü v9.63 Merged GCKL Single File</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="./src/js/01-console-shim.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <link rel="stylesheet" href="./src/styles/nursekit.css">
+</head>
+<body>
+    <div id="home-screen" class="screen active">
+        <div class="home-studio-shell">
+            <header class="studio-nav">
+                <div class="studio-brand">
+                    <div class="studio-logo">N</div>
+                    <div>
+                        <div class="studio-brand-title">NurseKit</div>
+                        <div class="studio-brand-sub">Cerrahi Hemşireliği Klinik Simülasyon Platformu</div>
+                    </div>
+                </div>
+                <div class="studio-nav-actions">
+                    <span class="studio-pill">v5.82</span>
+                    <span class="studio-pill studio-pill-live">Eğitim Modu</span>
+                </div>
+            </header>
+
+            <main class="studio-hero">
+                <section class="studio-copy">
+                    <div class="studio-eyebrow">Cerrahi Hemşireliği Simülasyonu</div>
+                    <h1>Gerçek vaka akışına yakın, sakin ve yapılandırılmış klinik öğrenme ortamı.</h1>
+                    <p class="studio-lead">Preoperatif hazırlık, intraoperatif güvenlik ve postoperatif bakım tek bir klinik akış içinde ilerler. Öğrenci hastayla iletişim kurar, güvenli karar verir, kritik hatayı fark eder ve faz sonunda ölçülebilir geri bildirim alır.</p>
+
+                    <div class="studio-command">
+                        <button class="studio-primary" id="home-start" type="button">
+                            <span>Simülasyona Başla</span>
+                            <b>→</b>
+                        </button>
+                        <button class="studio-secondary" id="home-method" type="button">Yöntemi İncele</button>
+                        <button class="mode-btn studio-mode active" id="home-mode-tutor" type="button"><span class="dot"></span>AI destekli rehberlik açık</button>
+                    </div>
+
+                    <div class="studio-trust-grid">
+                        <div><b>3</b><span>fazlı klinik akış</span></div>
+                        <div><b>10</b><span>puan kategorisi</span></div>
+                        <div><b>GCKL</b><span>güvenli cerrahi odağı</span></div>
+                    </div>
+                </section>
+
+                <aside class="studio-dashboard">
+                    <div class="studio-dashboard-head">
+                        <span>Klinik öğrenme akışı</span>
+                        <strong>360° akış</strong>
+                    </div>
+
+                    <div class="studio-flow-card active">
+                        <div class="flow-index">01</div>
+                        <div>
+                            <h3>Preoperatif Hazırlık</h3>
+                            <p>Hazırlık ve doğrulama: kimlik, onam, NPO, alerji, tetkik ve hasta eğitimi.</p>
+                        </div>
+                    </div>
+                    <div class="studio-flow-card">
+                        <div class="flow-index">02</div>
+                        <div>
+                            <h3>İntraoperatif Güvenlik</h3>
+                            <p>Ekip ve steril güvenlik: time-out, rol ayrımı, steril alan, sayım ve iletişim.</p>
+                        </div>
+                    </div>
+                    <div class="studio-flow-card">
+                        <div class="flow-index">03</div>
+                        <div>
+                            <h3>Postoperatif / PACU Bakımı</h3>
+                            <p>İzlem ve güvenli devir: solunum, ağrı, drenaj, mobilizasyon ve eğitim.</p>
+                        </div>
+                    </div>
+
+                </aside>
+            </main>
+
+            <section class="studio-bottom">
+                <div class="studio-mini-card">
+                    <span>Karar Temelli Öğrenme</span>
+                    <p>Mikro senaryo ve seçimli klinik karar kartlarıyla pasif izleme yerine aktif öğrenme.</p>
+                </div>
+                <div class="studio-mini-card">
+                    <span>Kritik Güvenlik Noktaları</span>
+                    <p>Alerji, NPO, yanlış taraf doğrulaması ve postop güvenlik riskleri ayrı ağırlıkla işlenir.</p>
+                </div>
+                <div class="studio-mini-card">
+                    <span>Faz Sonu Rapor</span>
+                    <p>Öğrencinin eksikleri vaka profiline göre görünür hale gelir; öğretim elemanı için çıktı üretir.</p>
+                </div>
+            </section>
+
+            <footer class="studio-footer">© NurseKit · Eğitim amaçlı simülasyon · Klinik karar yerine geçmez</footer>
+        </div>
+    </div>
+
+    <div id="case-select-screen" class="screen">
+        <div class="cs-head cs-head-product">
+            <div class="cs-head-left">
+                <button class="cs-back" id="cs-back">← Ana Sayfa</button>
+                <div class="cs-title-wrap"><div class="cs-title">Vaka Kütüphanesi</div><div class="cs-subtitle">Tam kapsamlı ve demo vakaları aynı ürün dili içinde filtrele, karşılaştır ve başlat.</div></div>
+            </div>
+            <div class="cs-head-right"><span class="cs-head-pill">Cerrahi Hemşireliği Simülasyonları</span><span class="cs-head-pill cs-head-pill-active" id="cs-filter-state">Tüm vakalar</span></div>
+        </div>
+        <div class="cs-toolbar cs-toolbar-product">
+            <div class="cs-search-wrap"><span class="cs-search-ic">⌕</span><input class="cs-search" id="cs-search" placeholder="Vaka adı, cerrahi, branş veya risk etiketi ara…"></div>
+            <select class="cs-select" id="cs-spec"></select>
+            <select class="cs-select" id="cs-diff"><option value="all">Tüm zorluklar</option><option value="1">Zorluk ★</option><option value="2">Zorluk ★★</option><option value="3">Zorluk ★★★</option></select>
+            <select class="cs-select" id="cs-status"><option value="all">Tüm vakalar</option><option value="full">Tam kapsamlı</option><option value="demo">Demo</option></select>
+        </div>
+        <div class="cs-body" id="cs-body"></div>
+    </div>
+
+    <div id="sim-screen" class="screen">
+        <div class="topbar">
+            <div class="tb-brand"><div class="mark">N</div><div class="name">NurseKit</div></div>
+            <div class="tb-status">
+                <div class="item"><span class="k">Mod</span><span class="v tag-mode" id="tb-mode">EĞİTİCİ MOD</span></div>
+                <div class="item"><span class="k">Yapay Zeka</span><span class="v tag-ai off" id="tb-ai">KAPALI</span></div>
+                <div class="item"><span class="k">Süre</span><span class="v" id="tb-timer" style="font-weight:bold; color:var(--teal);">00:00</span></div>
+                <div class="item"><span class="k">Hasta</span><span class="v" id="tb-patient">—</span></div>
+                <div class="item"><span class="k">Faz</span><span class="v" id="tb-phase">—</span></div>
+                <div class="item"><span class="k">Skor</span><span class="v" id="tb-score">0%</span></div>
+            </div>
+            <div class="tb-actions">
+                <button class="tb-btn ai-btn" id="tb-toggle-ai">✨ AI Hasta (AÇIK)</button>
+                
+                <button class="tb-btn" id="tb-settings" title="Çalışma ayarları (Ctrl+,)">⚙ Ayarlar</button>
+                <button class="tb-btn" id="tb-restart">Yeniden Başla</button>
+                <button class="tb-btn primary" id="tb-home">Ana Sayfa</button>
+            </div>
+        </div>
+        <div class="sim-main">
+            <aside class="panel left-panel">
+                <div class="panel-header"><div class="ph-title">Hasta Dosyası</div></div>
+                <div class="tab-row" id="left-tabs"></div>
+                <div class="panel-body" id="left-body"></div>
+            </aside>
+            <section class="panel center-panel">
+                <div class="phase-tabs" id="phase-tabs"></div>
+                <div class="scene-shell clean-mode" id="scene-shell">
+                    <div class="scene-overlay-top"><div class="scene-room-label" id="scene-room-label">—</div><div class="scene-camera-controls"><div class="focus-mode-seg" id="focus-mode-seg" role="tablist" aria-label="Sahne odak modu"><button class="active" data-focus-mode="task" title="Sadece aktif ve kritik görev işaretleri">Görev</button><button data-focus-mode="safety" title="Sadece kritik güvenlik işaretleri">Güvenlik</button><button data-focus-mode="free" title="Tüm işaretler (pasif olanlar soluk)">Serbest</button></div><button class="scene-cam-btn" data-cam-focus="phase">Faz odağı</button><button class="scene-cam-btn" data-cam-focus="wide">Geniş</button><button class="scene-cam-btn" data-cam-focus="close">Yakın</button></div><div class="scene-progress"><span id="progress-text">0/0 görev</span><span class="bar"><i id="progress-bar"></i></span></div></div>
+                    <canvas id="three-canvas"></canvas>
+                    
+                    <div class="scene-reaction-banner" id="scene-reaction-banner"></div>
+                    <!-- Klinik yerleşim paneli arayüzden kaldırıldı; altyapı kodları korunuyor. -->
+                    <div class="scene-hint">Sürükle: kamera · Nesneye tıkla: öğrenme kartı · Karakter animasyonu: faza göre klinik davranış</div>
+                    <div class="obj-popup" id="obj-popup"></div>
+                </div>
+            </section>
+            <aside class="panel right-panel">
+                <div class="panel-header"><div class="ph-title">Faz Görev Listesi</div><div class="task-progress-mini"><div class="mini-progress-box"><i id="task-progress-bar"></i><div class="mini-progress-text"><span class="done" id="task-progress-done">0</span><span class="sep">/</span><span class="total" id="task-progress-total">0</span></div></div></div></div>
+                <div class="panel-body">
+                    <div class="task-list" id="task-list"></div>
+                    <div id="event-card-area"></div>
+                    <button class="advance-btn" id="advance-btn" disabled>Sonraki Faza Geç →</button>
+                </div>
+            </aside>
+            <section class="panel dialogue-panel">
+                <div class="panel-header"><div class="ph-title">Hasta Diyaloğu · Yapılandırılmış Görüşme</div><span id="ai-status" class="ai-status off">Kural tabanlı yanıt</span></div>
+                <div class="dialogue-grid">
+                    <div class="dialogue-questions" id="dialogue-questions"></div>
+                    <div class="dialogue-stream"><div class="ds-head"><span>Diyalog Akışı</span><span class="muted">Gerçek zamanlı etkileşim</span></div><div class="ds-body" id="dialogue-stream-body"></div></div>
+                </div>
+            </section>
+            <aside class="panel score-panel">
+                <div class="score-strip"><div class="sl"><span>Puan kategorileri</span><span class="muted" style="font-family:var(--font-mono);">10 kategori + GCKL</span></div><div class="score-cats" id="score-cats"></div></div>
+            </aside>
+        </div>
+    </div>
+
+    <div id="method-screen" class="screen">
+        <div class="cs-head"><div class="cs-head-left"><button class="cs-back" id="method-back">← Ana Sayfa</button><div class="cs-title">Eğitim İçeriği Hazırlama Yaklaşımı</div></div></div>
+        <div class="method-shell">
+            <div class="method-head"><div><div class="mt-eyebrow">Akademik Metodoloji</div><div class="mt-title">Eğitim İçeriği Nasıl Hazırlandı?</div></div></div>
+            <div class="method-panel"><h2>Yapılandırma İlkeleri</h2><div class="ml">İçerik; öğrenme hedefleri, vaka temelli öğrenme, klinik akıl yürütme, hemşirelik tanıları ve kanıta dayalı bakım ilkeleri etrafında yapılandırılmıştır.</div><div id="method-acc"></div></div>
+
+            <!-- ========== GCKL Akademik Yöntem Bölümü ========== -->
+            <div class="method-panel" id="osce-method-panel">
+                <h2>Güvenli Cerrahi Kontrol Listesi Öğrenme Çerçevesi</h2>
+                <div class="ml">GCKL Öğrenme Modülü; öğrencinin güvenli cerrahi kontrol listesini vaka içinde uygulamasını, kritik adımları gerekçelendirmesini ve sayım güvenliği gibi yüksek riskli alanlarda doğru karar vermesini destekleyen yapılandırılmış bir eğitim simülasyonudur. Kod 0/1/2 yalnızca öğrenme durumunu gösterir.</div>
+                <div id="osce-method-acc"></div>
+            </div>
+            <div class="guide-map"><h2>Küresel Kılavuz Uyum Haritası</h2><div class="ml">Aşağıdaki tablo, simülasyon görevlerinin küresel perioperatif bakım kılavuz temalarıyla nasıl ilişkilendirildiğini gösterir.</div><table class="guide-tbl"><thead><tr><th>Kılavuz Teması</th><th>İlişkili Simülasyon Bileşenleri</th></tr></thead><tbody id="guide-tbl-body"></tbody></table><div class="guide-disclaimer">Bu simülasyon içeriği, küresel kılavuz temalarıyla uyumlu olacak şekilde eğitim amaçlı yapılandırılmıştır. Resmi kurum onayı içermez.</div></div>
+        </div>
+    </div>
+
+    <div id="report-screen" class="screen">
+        <div class="report-shell"><div class="report-doc">
+                <div class="rd-head"><div><div class="rd-eyebrow">NurseKit · Klinik Öğrenme Geri Bildirimi</div><div class="rd-title">Cerrahi Hemşireliği Simülasyon Öğrenme Raporu</div></div><div class="rd-meta" id="rd-patient-meta"></div></div>
+                <div class="rd-grid">
+                    <div style="grid-column: 1 / -1;">
+                        <div class="rd-section" style="margin-top:0;">
+                            <h3>Genel Simülasyon Performansı</h3>
+                            <div id="rd-total" style="font-family:var(--font-display); color:#1c2a3d;"></div>
+                            <div style="font-size:11px; color:#6f8197; margin-top:6px; font-style:italic;">
+                                Bu değer; tamamlanan görevler, semptom ve tanı seçimleri, klinik kararlar, cerrahi hemşireliği bilgisi ve güvenli cerrahi davranışlarına dayanan genel simülasyon-içi öğrenme performansıdır. GCKL uyumu ayrı bir alt gösterge olarak ayrıca raporlanır.
+                            </div>
+                        </div>
+                        <div class="rd-section" style="margin-top:14px;">
+                            <h3>Faz Bazlı Öğrenme Performansı</h3>
+                            <div id="rd-osce" style="display:flex; gap:14px; flex-wrap:wrap;"></div>
+                        </div>
+                        <div class="rd-section" style="margin-top:14px;">
+                            <h3>Hasta Profiline Özgü Kritik Bakım Raporu</h3>
+                            <div id="rd-profile-report"></div>
+                        </div>
+                        <div class="rd-section" style="margin-top:14px;">
+                            <h3>Faz Sonu Debriefing Özeti</h3>
+                            <div id="rd-phase-debrief"></div>
+                        </div>
+                    </div>
+                    <div><div class="rd-section"><h3>Kategori Performansı (Boyutlar)</h3><div id="rd-cats"></div></div><div class="rd-section"><h3>Tamamlanan Görevler</h3><ul class="rd-list" id="rd-tasks"></ul></div></div><div><div class="rd-section"><h3>Eksik Kritik Görevler</h3><ul class="rd-list" id="rd-missed"></ul></div><div class="rd-section"><h3>Klinik Olay Kararları</h3><ul class="rd-list" id="rd-decisions"></ul></div><div class="rd-section"><h3>Semptom ve Tanı Performans Detayları</h3><ul class="rd-list" id="rd-symp-diag-details"></ul></div><div class="rd-section"><h3>Klinik Akıl Yürütme</h3><ul class="rd-list" id="rd-reason"></ul></div><div class="rd-section"><h3>Kılavuz Uyum Özeti</h3><ul class="rd-list" id="rd-guide"></ul></div></div></div>
+
+                <!-- ========== GCKL Akademik Performans Raporu ========== -->
+                <div class="osce-report-block" id="rd-osce-phdyo">
+                    <h3>Güvenli Cerrahi Kontrol Listesi Öğrenme Raporu</h3>
+                    <div id="rd-osce-summary"></div>
+                    <div id="rd-osce-compliance"></div>
+                    <div id="rd-osce-items"></div>
+                    <div id="rd-osce-rationales"></div>
+                    <div id="rd-osce-sequence" style="display:none"></div>
+                </div>
+
+                <div class="rd-actions" style="margin-top:20px; justify-content:flex-start; border-bottom: 2px dotted #d4ccb6; padding-bottom:20px;">
+                    <!-- AI Egitmen Button Inject Yeri -->
+                </div>
+                <div class="rd-narrative" id="rd-narrative"></div>
+                
+                <!-- Yapılandırılmış İndirme ve Yazdırma Paneli -->
+                <div class="export-panel" style="margin-top: 32px; padding: 24px; background: #e8eef5; border: 1px dashed #a4b4c7; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <h4 style="margin: 0 0 4px 0; color: #122740; font-family: var(--font-display); font-size: 18px;">Raporu İndir / Yazdır</h4>
+                        <p style="margin: 0; font-size: 12px; color: #6f8197;">
+                            Araştırma verilerinizi CSV olarak alabilir, PDF olarak kaydedebilir veya yazdırabilirsiniz.<br>
+                            <span style="color:#d96371; font-weight:500;">Önemli Not:</span> Renklerin PDF'te görünmesi için yazdırma ayarlarından <b>'Arka Plan Grafikleri'ni (Background graphics)</b> açmayı unutmayın.
+                        </p>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="rd-action" onclick="exportResearchCSV()" style="background: #4cb88a; color: #062533; padding: 12px 24px; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor:pointer; border:1px solid #3ca878;">
+                            📊 Araştırma Verisi (CSV)
+                        </button>
+                        <button class="rd-action" onclick="exportOSCEJSON()" style="background: #9b89c4; color: #fff; padding: 12px 24px; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor:pointer; border:1px solid #7a68a4;">
+                            🧪 GCKL Veri (JSON)
+                        </button>
+                        <button class="rd-action" onclick="exportOSCECSV()" style="background: #5fb4b4; color: #fff; padding: 12px 24px; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor:pointer; border:1px solid #3a9090;">
+                            📋 Güvenli Cerrahi Verisi (CSV)
+                        </button>
+                        <button class="rd-action" id="rd-print" style="background: #1c2a3d; color: #fff; padding: 12px 24px; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor:pointer;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            Yazdır / PDF Olarak Kaydet
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Güncellenmiş Navigasyon Butonları -->
+                <div class="rd-actions" style="margin-top: 16px;">
+                    <button class="rd-action secondary" id="rd-method">Yöntem Sayfasını Aç</button>
+                    <button class="rd-action secondary" id="rd-restart">Vakayı Tekrarla</button>
+                    <button class="rd-action" id="rd-home">Ana Sayfaya Dön</button>
+                </div>
+        </div></div>
+    </div>
+
+    <!-- AI Nöbetçi Hekim Modal -->
+    <div class="modal-backdrop" id="doctor-modal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="mh-tag">Klinik İletişim & Ekip Çalışması</div>
+                    <div class="mh-title">✨ AI Nöbetçi Hekim</div>
+                </div>
+                <button class="mh-close" onclick="document.getElementById('doctor-modal').classList.remove('visible')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px; color:var(--ink-mute); margin-bottom:10px;">Hastanın durumunu nöbetçi/sorumlu hekime bildirin (SBAR formatı önerilir). Hekim (Gemini) size klinik order veya tavsiye verecektir.</p>
+                <div id="doctor-chat-history" style="max-height: 240px; overflow-y: auto; margin-bottom: 12px; padding: 10px; background: var(--navy-0); border-radius: 6px; border: 1px solid var(--line);"></div>
+                <textarea id="doctor-input" class="sbar-textarea" placeholder="Hekime iletmek istediğiniz mesaj..."></textarea>
+                <button class="rd-action ai-action" id="doctor-submit" style="width:100%; margin-top:12px;">✨ Mesajı Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="reason-modal"><div class="modal"><div class="modal-head"><div><div class="mh-tag" id="reason-tag">Klinik Akıl Yürütme</div><div class="mh-title" id="reason-title">Karar Gerekçesi</div></div><button class="mh-close" id="reason-close">×</button></div><div class="modal-body" id="reason-body"></div></div></div>
+    
+    <!-- SBAR Teslim Modal -->
+    <div class="modal-backdrop" id="sbar-modal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="mh-tag">İletişim & Güvenlik</div>
+                    <div class="mh-title" id="sbar-title">SBAR Teslimi</div>
+                </div>
+                <button class="mh-close" onclick="document.getElementById('sbar-modal').classList.remove('visible')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px; color:var(--ink-mute); margin-bottom:10px;">Lütfen hastanın mevcut durumunu SBAR (Durum, Arka Plan, Değerlendirme, Öneri) formatında yazarak teslim edin. Yapay zeka eğitmeniniz bu notu değerlendirecektir.</p>
+                <textarea id="sbar-input" class="sbar-textarea" placeholder="Durum (Situation): ...&#10;Arka Plan (Background): ...&#10;Değerlendirme (Assessment): ...&#10;Öneri (Recommendation): ..."></textarea>
+                <button class="rd-action ai-action" id="sbar-submit" style="width:100%; margin-top:12px;">✨ AI SBAR Değerlendir & Tamamla</button>
+                <div id="sbar-result" class="ai-result-box"></div>
+                <button class="rd-action" id="sbar-continue" style="width:100%; margin-top:12px; display:none;">Görevi Tamamla ve Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taburculuk Broşürü Modal -->
+    <div class="modal-backdrop" id="discharge-modal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="mh-tag">Hasta Merkezli Bakım</div>
+                    <div class="mh-title">✨ AI Taburculuk Eğitim Broşürü</div>
+                </div>
+                <button class="mh-close" onclick="document.getElementById('discharge-modal').classList.remove('visible')">×</button>
+            </div>
+            <div class="modal-body" id="discharge-body" style="font-size: 13px; line-height: 1.6; color: var(--ink);">
+            </div>
+            <div style="padding: 0 18px 18px 18px;">
+                 <button class="rd-action" onclick="window.print()" style="width:100%">Yazdır / PDF Al</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hasta Eğitim Planı Modal -->
+    <div class="modal-backdrop" id="education-modal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="mh-tag" id="education-tag">Hemşire Eğitim Planı</div>
+                    <div class="mh-title" id="education-title">Hasta Eğitimi</div>
+                </div>
+                <button class="mh-close" onclick="document.getElementById('education-modal').classList.remove('visible')">×</button>
+            </div>
+            <div class="modal-body" id="education-body" style="font-size:13px; line-height:1.6; color:var(--ink);"></div>
+            <div style="padding:0 18px 18px 18px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button class="rd-action" onclick="copyEducationModalText()">Metni Kopyala</button>
+                <button class="rd-action secondary" onclick="window.print()">Yazdır / PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAP Gözlem Notu Modal -->
+    <div class="modal-backdrop" id="soap-modal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="mh-tag">Klinik Değerlendirme & İletişim</div>
+                    <div class="mh-title">✨ AI Gözlem Notu (SOAP)</div>
+                </div>
+                <button class="mh-close" onclick="document.getElementById('soap-modal').classList.remove('visible')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px; color:var(--ink-mute); margin-bottom:10px;">Lütfen bulunduğunuz faza ait hemşirelik gözlemlerinizi SOAP (Subjektif, Objektif, Değerlendirme, Plan) formatında yazın. AI Eğitmen notunuzu değerlendirecektir.</p>
+                <textarea id="soap-input" class="sbar-textarea" placeholder="S (Subjektif veriler): ...&#10;O (Objektif veriler): ...&#10;A (Değerlendirme/Tanı): ...&#10;P (Plan/Girişim): ..."></textarea>
+                <button class="rd-action ai-action" id="soap-submit" style="width:100%; margin-top:12px;">✨ AI Notu Değerlendir</button>
+                <div id="soap-result" class="ai-result-box"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YENİ: AI Hasta Yakını Modal -->
+    <div class="modal-backdrop" id="family-modal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="mh-tag">İletişim & Empati</div>
+                    <div class="mh-title">✨ AI Hasta Yakını (Aile Görüşmesi)</div>
+                </div>
+                <button class="mh-close" onclick="document.getElementById('family-modal').classList.remove('visible')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px; color:var(--ink-mute); margin-bottom:10px;">Hastanın endişeli bir yakını (eşi/çocuğu) sizinle konuşmak istiyor. Hastanın durumu hakkında bilgi verin ve duygusal destek sağlayın.</p>
+                <div id="family-chat-history" style="max-height: 240px; overflow-y: auto; margin-bottom: 12px; padding: 10px; background: var(--navy-0); border-radius: 6px; border: 1px solid var(--line);"></div>
+                <textarea id="family-input" class="sbar-textarea" placeholder="Hasta yakınına iletmek istediğiniz mesaj..."></textarea>
+                <button class="rd-action ai-action" id="family-submit" style="width:100%; margin-top:12px;">✨ Mesajı Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- YENİ: AI Debriefing Modal -->
+    <div class="modal-backdrop" id="debrief-modal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="mh-tag">Öz-değerlendirme (Self-Reflection)</div>
+                    <div class="mh-title">✨ AI Eğitmen ile Debriefing</div>
+                </div>
+                <button class="mh-close" onclick="document.getElementById('debrief-modal').classList.remove('visible')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px; color:var(--ink-mute); margin-bottom:10px;">Klinik simülasyon sonu değerlendirme seansındasınız. Eğitmeniniz size performansınız ve hisleriniz hakkında açık uçlu sorular soracak.</p>
+                <div id="debrief-chat-history" style="max-height: 300px; overflow-y: auto; margin-bottom: 12px; padding: 10px; background: var(--navy-0); border-radius: 6px; border: 1px solid var(--line);"></div>
+                <textarea id="debrief-input" class="sbar-textarea" placeholder="Eğitmene yanıtınız..."></textarea>
+                <button class="rd-action ai-action" id="debrief-submit" style="width:100%; margin-top:12px;">✨ Yanıtla</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- ============= İP-3 Multi-Source Verification Modal ============= -->
+    <div class="modal-backdrop" id="msv-modal" style="z-index: 1100;">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-head">
+                <div>
+                    <div class="mh-tag" id="msv-tag" style="color:#5cc4d6;">Multi-Source Doğrulama</div>
+                    <div class="mh-title" id="msv-title">Madde</div>
+                </div>
+                <button class="modal-close" id="msv-close">×</button>
+            </div>
+            <div class="modal-body" id="msv-body">
+                <p style="font-size:13px; color:var(--ink-mute); margin-bottom:14px;">
+                    Bu kritik görev için <b>birden fazla bağımsız kaynaktan</b> doğrulama gereklidir.
+                    Sadece tüm kaynakları onayladığınızda görev tamamlanmış sayılır.
+                </p>
+                <div id="msv-sources" style="display:flex; flex-direction:column; gap:10px;">
+                    <!-- Dinamik checkbox'lar buraya -->
+                </div>
+                <div style="margin-top:18px; padding:12px; background: rgba(220,80,80,0.08); border:1px solid rgba(220,80,80,0.3); border-radius:6px;">
+                    <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
+                        <input type="checkbox" id="msv-conflict" style="margin-top:3px;">
+                        <span>
+                            <b style="color:#e55;">⚠ Kaynaklar arasında uyumsuzluk fark ettim</b>
+                            <br>
+                            <span style="font-size:12px; color:var(--ink-mute);">
+                                Örn. hasta "sağ" derken dosyada "sol" yazıyor; bileklik ile sözel beyan farklı.
+                                Bu durumda görev <b>güvensiz</b> olarak işaretlenecek ve cerrah/ekip uyarısı tetiklenecektir.
+                            </span>
+                        </span>
+                    </label>
+                </div>
+                <div style="margin-top:18px; display:flex; gap:10px;">
+                    <button class="rd-action" id="msv-cancel" style="flex:1;">Vazgeç</button>
+                    <button class="rd-action ai-action" id="msv-confirm" style="flex:2;">Onayla ve Tamamla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============= GCKL Gerekçelendirme Modal ============= -->
+    <div class="modal-backdrop osce-rationale-modal" id="osce-rationale-modal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="mh-tag" id="osce-rat-tag">GCKL · Gerekçelendirme</div>
+                    <div class="mh-title" id="osce-rat-title">Madde</div>
+                </div>
+                <button class="modal-close" id="osce-rat-close">×</button>
+            </div>
+            <div class="modal-body" id="osce-rat-body">
+                <div class="osce-q">
+                    <div class="qt" id="osce-rat-itemid">PRE-X</div>
+                    <div id="osce-rat-criterion">Madde kriteri…</div>
+                </div>
+                <div style="margin-top:8px"><b id="osce-rat-question">Soru</b></div>
+                <textarea class="osce-rt" id="osce-rat-input" placeholder="Klinik gerekçenizi 1-3 cümle ile yazın…"></textarea>
+                <div class="osce-hint" id="osce-rat-hint">Gerekçeniz, ilgili maddenin tam puana erişebilmesi için gereken klinik kanıttır. Yeterli ise madde tam puan, eksik ise kısmi puan alır.</div>
+                <div class="osce-feedback" id="osce-rat-feedback" style="display:none"></div>
+                <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-end">
+                    <button class="rd-action osce-skip" id="osce-rat-skip">Geç</button>
+                    <button class="rd-action" id="osce-rat-submit">Gönder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============= GCKL İzlem Paneli (görünür öğrenci akışından çıkarıldı) ============= -->
+    <div class="osce-observer-panel" id="osce-observer-panel">
+        <div class="osce-obs-head">
+            <h3>GCKL İzlem Paneli <span class="badge">EĞİTİCİ</span></h3>
+            <button class="modal-close" id="osce-obs-close" style="position:relative;top:auto;right:auto">×</button>
+        </div>
+        <div class="osce-obs-tabs">
+            <button class="osce-obs-tab active" data-obs="observer1">Eğitici İzlem</button>
+        </div>
+        <div class="osce-obs-summary" id="osce-obs-summary"></div>
+        <div class="osce-obs-body" id="osce-obs-body"></div>
+        <div class="osce-obs-foot">
+            <button class="secondary" id="osce-obs-reset">Sıfırla</button>
+            <button id="osce-obs-finalize">Öğrenme Skorunu Kaydet</button>
+        </div>
+    </div>
+
+    <!-- ============= Study Meta / API Key Modal ============= -->
+    <div class="modal-backdrop" id="osce-settings-modal">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="mh-tag">Eğitim Oturumu Ayarları</div>
+                    <div class="mh-title">Katılımcı & API</div>
+                </div>
+                <button class="modal-close" id="osce-settings-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="study-form">
+                    <label>Öğrenci/Katılımcı No
+                        <input type="text" id="sm-studentId" placeholder="örn. NK-2025-001">
+                    </label>
+                    <label class="hidden">Akış
+                        <select id="sm-group">
+                            <option value="intervention">Eğitim Modu</option>
+                        </select>
+                    </label>
+                    <label>Zaman Noktası
+                        <select id="sm-timePoint">
+                            <option value="pre">Ön Test</option>
+                            <option value="post">Son Test</option>
+                            <option value="retention">Kalıcılık</option>
+                        </select>
+                    </label>
+                    <label>Merkez/Site
+                        <input type="text" id="sm-site" placeholder="Hastane / okul">
+                    </label>
+                    <label class="full consent">
+                        <input type="checkbox" id="sm-consent">
+                        Bilgilendirilmiş onam alındı, veri etik kurul onaylı kullanım için kaydedilebilir.
+                    </label>
+                    <label class="full">Gemini API Anahtarı (sadece bu oturum için saklanır)
+                        <input type="password" id="sm-apikey" placeholder="AIza…">
+                    </label>
+                </div>
+                <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px">
+                    <button class="rd-action" id="osce-settings-save">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="phase-debrief-backdrop" id="phase-debrief-modal">
+        <div class="phase-debrief-card" role="dialog" aria-modal="true">
+            <div class="phase-debrief-head">
+                <div>
+                    <div class="phase-debrief-kicker">Faz Sonu Debriefing</div>
+                    <div class="phase-debrief-title" id="phase-debrief-title">Faz değerlendirmesi</div>
+                    <div class="phase-debrief-sub" id="phase-debrief-sub">Bir sonraki faza geçmeden önce güvenlik, iletişim ve karar verme çıktıları özetlenir.</div>
+                </div>
+                <button class="phase-debrief-close" id="phase-debrief-close">×</button>
+            </div>
+            <div class="phase-debrief-body">
+                <div class="phase-debrief-metrics" id="phase-debrief-metrics"></div>
+                <div class="phase-debrief-grid">
+                    <div class="phase-debrief-panel"><h4>Güçlü davranışlar</h4><ul id="phase-debrief-good"></ul></div>
+                    <div class="phase-debrief-panel"><h4>Eksik / riskli noktalar</h4><ul id="phase-debrief-missed"></ul></div>
+                    <div class="phase-debrief-panel"><h4>Klinik kararlar</h4><ul id="phase-debrief-decisions"></ul></div>
+                    <div class="phase-debrief-panel"><h4>Sonraki faza odak</h4><ul id="phase-debrief-next"></ul></div>
+                </div>
+            </div>
+            <div class="phase-debrief-actions">
+                <button id="phase-debrief-stay">Bu fazda kal</button>
+                <button class="primary" id="phase-debrief-continue">Devam et</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./src/js/02-main-app.js"></script>
+
+<!-- ============= PRE_GCKL_NETWORK — 100p Ağ Tabanlı Preop Puanlama ============= -->
+<script src="./src/js/03-pre-gckl-network.js"></script>
+<script src="./src/js/04-pre-gckl-bootstrap.js"></script>
+<script src="./src/js/05-intra-gckl-network.js"></script>
+<script src="./src/js/06-intra-gckl-bootstrap.js"></script>
+<script src="./src/js/07-intra-gckl-popup.js"></script>
+<script src="./src/js/08-intra-popups.js"></script>
+<script src="./src/js/09-intra-gckl-report.js"></script>
+<script src="./src/js/10-phase-scores.js"></script>
+<script src="./src/js/11-pre-gckl-report.js"></script>
+<script src="./src/js/12-preop-osce-disabled-forwarder.js"></script>
+
+
+<!-- v9.63 merged: external GCKL modules inlined; intraop task patch active. -->
+</body>
+</html>
+
+<script src="./src/js/13-gckl-board-sync-load.js"></script>
+
+
+<script src="./src/js/14-gckl10-tasklist-patch.js"></script>
