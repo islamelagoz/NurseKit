@@ -1,0 +1,134 @@
+{
+  "source_file": "NurseKit_v9_65_STEP13_FINAL_REGRESSION.html",
+  "source_bytes": 2951839,
+  "source_lines": 43055,
+  "primary_css": {
+    "file": "src/styles/nursekit.css",
+    "bytes": 202580,
+    "sha256": "ce82af0ea5abaeba827842483b5b0794966aa327425afb534bf2ecc423776c68",
+    "original_start_line": 28,
+    "original_end_line": 6072
+  },
+  "inline_scripts_externalised": [
+    {
+      "order": 1,
+      "original_line": 10,
+      "file": "src/js/01-console-shim.js",
+      "bytes": 956,
+      "sha256": "1c68c17cdbb89da7cc6e59122029a5d56a44b26ef42737a2ed2799032ad2bae1",
+      "first_line": "/* Defansif console shim: bazı ortamlar (eklenti, sandbox, eski iframe) console.info/group/groupEnd metodlarını"
+    },
+    {
+      "order": 2,
+      "original_line": 1281,
+      "file": "src/js/02-main-app.js",
+      "bytes": 2258741,
+      "sha256": "fa88b9b34519a20be78cc585086cbb266247dc6bd691390da4650a9ad0131bde",
+      "first_line": "'use strict';"
+    },
+    {
+      "order": 3,
+      "original_line": 31632,
+      "file": "src/js/03-pre-gckl-network.js",
+      "bytes": 32845,
+      "sha256": "2d61c1b044507c49ea5088395503028e43de763c2b8aa351a9ca55191d145bf4",
+      "first_line": "/* ===== Inlined from pre-gckl-network.js ===== */"
+    },
+    {
+      "order": 4,
+      "original_line": 32089,
+      "file": "src/js/04-pre-gckl-bootstrap.js",
+      "bytes": 12718,
+      "sha256": "ef255b9ffd31a2d0066648be38569fb39f113ba135d7bf8680fd579251a26ef1",
+      "first_line": "/* ===== Inlined from pre-gckl-bootstrap.js ===== */"
+    },
+    {
+      "order": 5,
+      "original_line": 32257,
+      "file": "src/js/05-intra-gckl-network.js",
+      "bytes": 40848,
+      "sha256": "0d9229547757bc8ae57f75773fac0b5865b7c4026b7c9b35fc80267f5db51bc8",
+      "first_line": "/* ===== Inlined from intra-gckl-network.js ===== */"
+    },
+    {
+      "order": 6,
+      "original_line": 32749,
+      "file": "src/js/06-intra-gckl-bootstrap.js",
+      "bytes": 32335,
+      "sha256": "78f7c32955ba16679500c42f107b97c107d276eac84d5275bd381c4c3e955923",
+      "first_line": "/* ===== Inlined from intra-gckl-bootstrap.js ===== */"
+    },
+    {
+      "order": 7,
+      "original_line": 33280,
+      "file": "src/js/07-intra-gckl-popup.js",
+      "bytes": 26930,
+      "sha256": "0a63c552027bbb3a4fc665b4f07578a0379de535bbbb30462e3bfbc99001cf03",
+      "first_line": "/* ===== Inlined from intra-gckl-popup.js ===== */"
+    },
+    {
+      "order": 8,
+      "original_line": 33649,
+      "file": "src/js/08-intra-popups.js",
+      "bytes": 130472,
+      "sha256": "c3a943387a4c3aba8b44b209c32e8219fae81a70e7df1f03edebd15d51d22f0a",
+      "first_line": "/* ====================================================================="
+    },
+    {
+      "order": 9,
+      "original_line": 35978,
+      "file": "src/js/09-intra-gckl-report.js",
+      "bytes": 18310,
+      "sha256": "685abfbfdf7784efdee53543d8192e6b610002fc8bc0b8693a439672a7a7a4eb",
+      "first_line": "/* ===== Inlined from intra-gckl-report.js ===== */"
+    },
+    {
+      "order": 10,
+      "original_line": 36404,
+      "file": "src/js/10-phase-scores.js",
+      "bytes": 3244,
+      "sha256": "44ff0cf0428695658bf556698943a31bbfe27b41cb8f977c610531b822f3ed30",
+      "first_line": "/* ===== Inlined from phase-scores.js ===== */"
+    },
+    {
+      "order": 11,
+      "original_line": 36473,
+      "file": "src/js/11-pre-gckl-report.js",
+      "bytes": 7500,
+      "sha256": "6a53f01bd13eedf5737c71b062bed606ac4742db7d58f45e2994d859b317c3a8",
+      "first_line": "/* ===== Inlined from pre-gckl-report.js ===== */"
+    },
+    {
+      "order": 12,
+      "original_line": 36645,
+      "file": "src/js/12-preop-osce-disabled-forwarder.js",
+      "bytes": 3003,
+      "sha256": "102e018e37fef9b82637aeea19b3d5062fad811c5551c4947423b0455ba79a65",
+      "first_line": "(function () {"
+    },
+    {
+      "order": 13,
+      "original_line": 36672,
+      "file": "src/js/13-gckl-board-sync-load.js",
+      "bytes": 96,
+      "sha256": "15a7a1475cc327b31ad7ce62ed8563c94c0e409cf96d58ab250491f7465bd7ab",
+      "first_line": "try{window.addEventListener('load',()=>{try{gcklBoardSyncMarkerState();}catch(e){}});}catch(e){}"
+    },
+    {
+      "order": 14,
+      "original_line": 36673,
+      "file": "src/js/14-gckl10-tasklist-patch.js",
+      "bytes": 142374,
+      "sha256": "2906c6f087f84a52f45de6909da518aad9dc8c93424353af0dcc30904d9d9aa1",
+      "first_line": "(function nkCollapseGCKL10TaskListPatch(){"
+    }
+  ],
+  "remaining_inline_style_tags": 0,
+  "remaining_inline_script_tags": 0,
+  "external_script_tags_total": 16,
+  "notes": [
+    "The second inline <style> block was intentionally left in place because it is a late pre-GCKL panel style block and preserving its load position is safer.",
+    "The main application script remains a single external file to preserve scope and execution behavior.",
+    "No semantic patient/task/GCKL/3D splitting was attempted in this stage."
+  ]
+}
