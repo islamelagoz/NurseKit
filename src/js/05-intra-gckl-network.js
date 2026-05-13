@@ -55,7 +55,8 @@
     'equipmentAndFireSafety',
     'sterileFieldAndTraffic',
     'positioningAndTemperature',
-    'countSafety:initial'
+    'countSafety:initial',
+    'teamCommunication'
   ];
 
   var CLOSE_BARRIERS = [
@@ -91,8 +92,8 @@
       category: 'timeoutVerification',
       role: ['surgeon', 'anesthesia', 'circulating', 'scrub'],
       max: 5,
-      criticality: 'medium-high',
-      hardStop: false,
+      criticality: 'hard-stop',
+      hardStop: true,
       prerequisites: [],
       unlocks: ['patientProcedureSite'],
       taskTags: ['t_timeout'],
@@ -115,7 +116,7 @@
             why: 'Sayım ve cihaz güvenliği bilgisi hemşirededir; eksik ekip = eksik bariyer.' }
         ]
       },
-      scoreImpact: { correct: 5, incomplete: 2, wrong: -3, hardStop: false, stopBonus: 1 }
+      scoreImpact: { correct: 5, incomplete: 2, wrong: -5, hardStop: true, stopBonus: 2 }
     }),
 
     // ── 2. HASTA / İŞLEM / BÖLGE DOĞRULAMA (ayrı kart) ───────────────────────
@@ -304,8 +305,8 @@
       category: 'sterileEquipPosition',
       role: ['surgeon', 'scrub', 'circulating'],
       max: 8,
-      criticality: 'hard-stop',
-      hardStop: true,
+      criticality: 'high',
+      hardStop: false,
       prerequisites: ['patientProcedureSite'],
       unlocks: [],
       taskTags: ['t_equipment', 't_antiseptic'],
@@ -328,7 +329,7 @@
             why: 'Drape altında biriken alkol buharı yangın riskini artırır, azaltmaz.' }
         ]
       },
-      scoreImpact: { correct: 8, incomplete: 3, wrong: -6, hardStop: true, stopBonus: 2 }
+      scoreImpact: { correct: 8, incomplete: 3, wrong: -6, hardStop: false, stopBonus: 2 }
     }),
 
     // ── 8. STERİL ALAN VE ODA TRAFİĞİ ────────────────────────────────────────
@@ -414,14 +415,15 @@
       prerequisites: ['patientProcedureSite'],     // başlangıç için
       // final evidence kapanış kümesinin parçası — canCloseSignout kontrol eder
       unlocks: ['specimenAndEquipmentIssue', 'signOutHandoff'],
-      taskTags: ['t_count_initial', 't_count_final'],
+      taskTags: ['t_count_initial', 't_count_additional', 't_count_final'],
       taskEvidenceMap: {                            // hangi tag hangi evidence'a karşılık
         't_count_initial': 'count_initial',
+        't_count_additional': 'count_additional',
         't_count_final': 'count_final'
       },
       linkedObjects: ['count-board', 'instrument-tray', 'sponge-pack', 'needle-counter'],
-      requiredEvidence: ['count_initial', 'count_final'],
-      evidenceScore: { count_initial: 5, count_final: 7 },  // toplam 12
+      requiredEvidence: ['count_initial', 'count_additional', 'count_final'],
+      evidenceScore: { count_initial: 4, count_additional: 2, count_final: 6 },  // toplam 12
       rationale: {
         prompt: 'Kapanış sayımında spanç sayısı 1 eksik. Cerrah “muhtemelen çöpe gitti, kapatın” diyor. Scrub hemşire emin değil. Doğru tutum?',
         options: [
@@ -512,8 +514,315 @@
         ]
       },
       scoreImpact: { correct: 10, incomplete: 3, wrong: -7, hardStop: true, stopBonus: 2 }
+    }),
+
+    cabgCpbSafety: def({
+      id: 'cabgCpbSafety',
+      label: 'CABG / KPB Hazir Olus',
+      gckl: 'CABG olgusunda KPB makinesi, perfuzyon ekibi, heparin/ACT plani ve pompa acik izlem hazirligi ekipce teyit edilir.',
+      category: 'anesthesiaBlood',
+      role: ['surgeon', 'anesthesia', 'perfusion', 'circulating'],
+      max: 5,
+      criticality: 'high',
+      hardStop: false,
+      prerequisites: ['patientProcedureSite', 'bloodLossRisk'],
+      unlocks: [],
+      taskTags: ['t_cabg_cpb_ready'],
+      linkedObjects: ['cpb-machine', 'perfusionist', 'perfusion-console', 'cpb-phase-board'],
+      requiredEvidence: ['cpb_machine_ready', 'perfusion_team_ready', 'heparin_act_plan_shared'],
+      rationale: {
+        prompt: 'CABG vakasinda KPB makinesi hazir gorunuyor ancak ACT/heparin plani ekipce sesli paylasilmamis. En guvenli tutum hangisidir?',
+        options: [
+          { text: 'Makine gorunur durumdaysa KPB hazir kabul edilir.', correct: false, criticalIfChosen: false, why: 'KPB hazirligi cihaz varligindan ibaret degildir; ekip, heparin/ACT ve cikis plani birlikte dogrulanir.' },
+          { text: 'Perfuzyon, cerrahi ve anestezi ekibi KPB hazirligini kapali dongu ile teyit eder.', correct: true, criticalIfChosen: false, why: 'CABG guvenligi ekip paylasimi, cihaz hazirligi ve antikoagulasyon hedeflerinin birlikte dogrulanmasina dayanir.' },
+          { text: 'KPB ayrintilari yalniz perfuzyonistin sorumlulugudur.', correct: false, criticalIfChosen: false, why: 'KPB ekipler arasi ortak mental model gerektirir; tek role birakilamaz.' },
+          { text: 'KPB plani postop kaydinda netlestirilir.', correct: false, criticalIfChosen: true, why: 'KPB hazirligi intraop kritik guvenlik davranisidir; gec kayit bariyer degildir.' }
+        ]
+      },
+      scoreImpact: { correct: 5, incomplete: 2, wrong: -3, hardStop: false, stopBonus: 1 }
+    }),
+
+    teamCommunication: def({
+      id: 'teamCommunication',
+      label: 'Kapali Dongu Ekip Iletisimi',
+      gckl: 'Rol netligi, kritik bilgi paylasimi ve kapali dongu iletişim time-out boyunca gorunur bicimde surdurulur.',
+      category: 'signOutHandover',
+      role: ['surgeon', 'anesthesia', 'circulating', 'scrub'],
+      max: 5,
+      criticality: 'high',
+      hardStop: false,
+      prerequisites: ['timeOutTeam'],
+      unlocks: [],
+      taskTags: ['t_team_communication'],
+      linkedObjects: ['or-team-figures', 'time-out', 'circulating-nurse', 'surgeon'],
+      requiredEvidence: ['roles_confirmed', 'closed_loop_confirmed'],
+      rationale: {
+        prompt: 'Time-out sirasinda bir ekip uyesi kritik bilgiyi sessizce kayda giriyor, sozlu geri okuma yok. Ne yapilmalidir?',
+        options: [
+          { text: 'Kayit yapildigi icin sozlu geri okuma gerekli degildir.', correct: false, criticalIfChosen: false, why: 'Kapali dongu iletisim, mesajin alindigini ve anlasildigini sozlu olarak dogrular.' },
+          { text: 'Kritik bilgi sozlu paylasilir, alici ekip uyesi geri okur ve sorumluluk netlestirilir.', correct: true, criticalIfChosen: false, why: 'Rol ve kapali dongu teyidi ekip hatalarini azaltan temel bariyerdir.' },
+          { text: 'Sadece cerrah ve anestezi konusursa yeterlidir.', correct: false, criticalIfChosen: false, why: 'Scrub ve sirkule ekip sayim, sterilite ve malzeme bilgisi tasir.' },
+          { text: 'Kritik bilgi sign-outa kadar ertelenir.', correct: false, criticalIfChosen: true, why: 'Kesi oncesi paylasilmasi gereken bilgi gec kalirsa bariyer islevsiz kalir.' }
+        ]
+      },
+      scoreImpact: { correct: 5, incomplete: 2, wrong: -3, hardStop: false, stopBonus: 1 }
     })
   };
+
+  function normalizeNodeSchema() {
+    Object.keys(NODES).forEach(function (id) {
+      var n = NODES[id];
+      n.gcklItem = n.gcklItem || n.gckl || n.label;
+      n.weight = (typeof n.weight === 'number') ? n.weight : (n.max || 0);
+      n.criticalLevel = n.criticalLevel || (n.hardStop ? 'hardStop' :
+        (/high/.test(String(n.criticality || '')) ? 'high' :
+          (/medium/.test(String(n.criticality || '')) ? 'medium' : 'low')));
+      if (n.rationale) {
+        n.rationaleQuestion = n.rationaleQuestion || n.rationale.prompt || '';
+        n.options = n.options || n.rationale.options || [];
+        if (typeof n.correctOption !== 'number' && Array.isArray(n.options)) {
+          n.correctOption = n.options.findIndex(function (o) { return o && o.correct; });
+        }
+      }
+      n.evidenceLabels = n.evidenceLabels || {};
+      (n.requiredEvidence || []).forEach(function (ev) {
+        if (!n.evidenceLabels[ev]) n.evidenceLabels[ev] = ev.replace(/_/g, ' ');
+      });
+    });
+  }
+
+  var INTRAOP_GCKL_MAP = [
+    {
+      id: 'intraopIdentityProcedure',
+      nodeId: 'patientProcedureSite',
+      label: 'Correct patient, procedure, and surgical site',
+      gcklItem: 'Correct patient, correct procedure, correct surgical site',
+      category: 'criticalSafety',
+      criticalLevel: 'hardStop',
+      weight: 6,
+      hardStop: true,
+      taskId: 'intraop_identity_procedure',
+      taskLabel: 'Confirm identity, procedure, site, and planned operation',
+      role: 'Circulating nurse + whole team',
+      linkedObjects: ['time-out', 'patient-wristband', 'consent-form', 'site-marking', 'ssc-board-intraop'],
+      requiredEvidence: ['identity_verbal', 'procedure_verbal', 'site_marking_visible'],
+      gcklItems: ['GCKL-10', 'GCKL-11', 'GCKL-18'],
+      gcklTaskIds: ['gckl_10_patient_verify', 'gckl_11_site_marking', 'gckl_18_verbal_verify'],
+      phaseAdvancementImpact: 'blocksPostop'
+    },
+    {
+      id: 'intraopTeamTimeOut',
+      nodeId: 'timeOutTeam',
+      label: 'Formal team time-out before incision',
+      gcklItem: 'Formal team time-out before incision',
+      category: 'criticalSafety',
+      criticalLevel: 'hardStop',
+      weight: 5,
+      hardStop: true,
+      taskId: 'intraop_team_timeout',
+      taskLabel: 'Perform team time-out before incision',
+      role: 'Whole OR team',
+      linkedObjects: ['time-out', 'or-team-figures', 'surgeon', 'anaesthesia-team', 'ssc-board-intraop'],
+      requiredEvidence: ['team_attention'],
+      gcklItems: ['GCKL-17', 'GCKL-18', 'GCKL-19'],
+      gcklTaskIds: ['gckl_17_team_pause', 'gckl_18_verbal_verify'],
+      phaseAdvancementImpact: 'blocksPostop'
+    },
+    {
+      id: 'intraopAllergyAntibiotic',
+      nodeId: 'antibioticProphylaxis',
+      label: 'Allergy and prophylactic antibiotic safety',
+      gcklItem: 'Allergy confirmation and prophylactic antibiotic safety',
+      category: 'criticalSafety',
+      criticalLevel: 'hardStop',
+      weight: 5,
+      hardStop: true,
+      taskId: 'intraop_allergy_antibiotic',
+      taskLabel: 'Confirm allergy and antibiotic status',
+      role: 'Anaesthesia + circulating nurse',
+      linkedObjects: ['signin', 'antibiotic-syringe', 'allergy-band', 'anaesthesia-team'],
+      requiredEvidence: ['antibiotic_time_verified', 'allergy_cross_checked'],
+      gcklItems: ['GCKL-14', 'GCKL-20'],
+      gcklTaskIds: ['gckl_14_allergy_check', 'gckl_20_abx_verify'],
+      phaseAdvancementImpact: 'blocksPostop'
+    },
+    {
+      id: 'intraopAnaesthesiaSafety',
+      nodeId: 'anesthesiaSafety',
+      label: 'Anaesthesia safety readiness',
+      gcklItem: 'Airway, monitoring, IV access, anaesthesia readiness',
+      category: 'clinicalPrep',
+      criticalLevel: 'high',
+      weight: 10,
+      hardStop: false,
+      taskId: 'intraop_anaesthesia_safety',
+      taskLabel: 'Confirm anaesthesia safety readiness',
+      role: 'Anaesthesia team + circulating nurse',
+      linkedObjects: ['signin', 'anaesthesia-team', 'airway-cart', 'iv-pump-intraop'],
+      requiredEvidence: ['airway_secured', 'spo2_reliable', 'critical_risks_shared'],
+      gcklItems: ['GCKL-12', 'GCKL-13', 'GCKL-19'],
+      gcklTaskIds: ['gckl_12_anesthesia_checklist', 'gckl_13_pulse_ready', 'gckl_19_anesthesia_review'],
+      phaseAdvancementImpact: 'scoreOnly'
+    },
+    {
+      id: 'intraopSterileField',
+      nodeId: 'sterileFieldAndTraffic',
+      label: 'Sterile field integrity',
+      gcklItem: 'Sterile field and aseptic boundary protection',
+      category: 'clinicalPrep',
+      criticalLevel: 'high',
+      weight: 6,
+      hardStop: false,
+      taskId: 'intraop_sterile_field',
+      taskLabel: 'Verify sterile field integrity',
+      role: 'Scrub nurse + circulating nurse',
+      linkedObjects: ['mayo-stand', 'sterile-table', 'graft-prep-table', 'scrub-nurse-3d'],
+      requiredEvidence: ['sterile_field_intact', 'traffic_controlled'],
+      gcklItems: ['GCKL-21', 'GCKL-22'],
+      gcklTaskIds: ['gckl_21_material_ready', 'gckl_22_steril_verify'],
+      phaseAdvancementImpact: 'scoreOnly'
+    },
+    {
+      id: 'intraopInitialCount',
+      nodeId: 'countSafety',
+      label: 'Initial instrument, sponge, and sharp count',
+      gcklItem: 'Initial instrument/sponge/sharp count',
+      category: 'criticalSafety',
+      criticalLevel: 'hardStop',
+      weight: 4,
+      hardStop: true,
+      taskId: 'intraop_initial_count',
+      taskLabel: 'Perform initial surgical count',
+      role: 'Scrub nurse + circulating nurse',
+      linkedObjects: ['count-board', 'scrub-nurse-3d', 'circulating-nurse', 'mayo-stand'],
+      requiredEvidence: ['count_initial'],
+      gcklItems: ['GCKL-27'],
+      gcklTaskIds: ['gckl_27_count_open'],
+      phaseAdvancementImpact: 'blocksPostop'
+    },
+    {
+      id: 'intraopAdditionalCount',
+      nodeId: 'countSafety',
+      label: 'Count update for additions or material change',
+      gcklItem: 'Count update during additions or personnel/material change',
+      category: 'clinicalPrep',
+      criticalLevel: 'high',
+      weight: 2,
+      hardStop: false,
+      taskId: 'intraop_additional_count',
+      taskLabel: 'Update count when additional materials are introduced',
+      role: 'Circulating nurse + scrub nurse',
+      linkedObjects: ['count-board', 'circulating-nurse', 'mayo-stand', 'graft-prep-table'],
+      requiredEvidence: ['count_additional'],
+      gcklItems: ['GCKL-27'],
+      gcklTaskIds: ['gckl_27_count_open'],
+      phaseAdvancementImpact: 'scoreOnly'
+    },
+    {
+      id: 'intraopFinalCount',
+      nodeId: 'countSafety',
+      label: 'Final count before closure',
+      gcklItem: 'Final count before closure',
+      category: 'criticalSafety',
+      criticalLevel: 'hardStop',
+      weight: 6,
+      hardStop: true,
+      taskId: 'intraop_final_count',
+      taskLabel: 'Confirm final count before closure',
+      role: 'Scrub nurse + circulating nurse + surgeon',
+      linkedObjects: ['count-board', 'scrub-nurse-3d', 'circulating-nurse', 'surgeon'],
+      requiredEvidence: ['count_final'],
+      gcklItems: ['GCKL-27'],
+      gcklTaskIds: ['gckl_27_count_close'],
+      phaseAdvancementImpact: 'blocksPostop'
+    },
+    {
+      id: 'intraopSpecimenSafety',
+      nodeId: 'specimenAndEquipmentIssue',
+      label: 'Specimen labelling and handoff',
+      gcklItem: 'Specimen identification, labelling, handoff',
+      category: 'clinicalPrep',
+      criticalLevel: 'high',
+      weight: 8,
+      hardStop: false,
+      taskId: 'intraop_specimen_safety',
+      taskLabel: 'Verify specimen labelling and handoff',
+      role: 'Circulating nurse + surgeon',
+      linkedObjects: ['specimen', 'specimen-container', 'circulating-nurse'],
+      requiredEvidence: ['specimen_labeled'],
+      gcklItems: ['GCKL-28'],
+      gcklTaskIds: ['gckl_28_specimen_verify'],
+      phaseAdvancementImpact: 'scoreOnly'
+    },
+    {
+      id: 'intraopEquipmentFireSafety',
+      nodeId: 'equipmentAndFireSafety',
+      label: 'Equipment and fire-safety readiness',
+      gcklItem: 'Electrosurgery, suction, fire risk and equipment safety',
+      category: 'clinicalPrep',
+      criticalLevel: 'high',
+      weight: 8,
+      hardStop: false,
+      taskId: 'intraop_equipment_fire_safety',
+      taskLabel: 'Confirm electrosurgery/suction/fire-safety readiness',
+      role: 'Circulating nurse + whole team',
+      linkedObjects: ['esu-unit', 'suction-smoke', 'smoke-evac', 'fire-risk', 'signin'],
+      requiredEvidence: ['esu_pad_position', 'antiseptic_dry', 'fire_triangle_assessed'],
+      gcklItems: ['GCKL-19', 'GCKL-21', 'GCKL-22'],
+      gcklTaskIds: ['gckl_19_surgeon_review', 'gckl_21_material_ready', 'gckl_22_steril_verify'],
+      phaseAdvancementImpact: 'scoreOnly'
+    },
+    {
+      id: 'intraopCABGCPBSafety',
+      nodeId: 'cabgCpbSafety',
+      label: 'CABG/CPB readiness',
+      gcklItem: 'CABG-specific cardiopulmonary bypass readiness if CABG case is active',
+      category: 'clinicalPrep',
+      criticalLevel: 'high',
+      weight: 5,
+      hardStop: false,
+      taskId: 'intraop_cabg_cpb_safety',
+      taskLabel: 'Confirm CABG/CPB readiness for CABG case',
+      role: 'Perfusion + surgeon + anaesthesia + circulating nurse',
+      linkedObjects: ['cpb-machine', 'perfusionist', 'perfusion-console', 'cpb-phase-board'],
+      requiredEvidence: ['cpb_machine_ready', 'perfusion_team_ready', 'heparin_act_plan_shared'],
+      gcklItems: ['GCKL-16', 'GCKL-19', 'GCKL-21'],
+      gcklTaskIds: ['gckl_16_bleeding_assess', 'gckl_19_surgeon_review', 'gckl_21_material_ready'],
+      phaseAdvancementImpact: 'scoreOnly'
+    },
+    {
+      id: 'intraopCommunicationHandoff',
+      nodeId: 'teamCommunication',
+      label: 'Closed-loop team communication',
+      gcklItem: 'Closed-loop communication and role clarity',
+      category: 'communication',
+      criticalLevel: 'high',
+      weight: 5,
+      hardStop: false,
+      taskId: 'intraop_communication_handoff',
+      taskLabel: 'Confirm closed-loop team communication',
+      role: 'Whole OR team',
+      linkedObjects: ['or-team-figures', 'time-out', 'circulating-nurse', 'surgeon', 'anaesthesia-team'],
+      requiredEvidence: ['roles_confirmed', 'closed_loop_confirmed'],
+      gcklItems: ['GCKL-17', 'GCKL-19', 'GCKL-29'],
+      gcklTaskIds: ['gckl_17_team_pause', 'gckl_19_anesthesia_review', 'gckl_29_handover'],
+      phaseAdvancementImpact: 'scoreOnly'
+    }
+  ];
+
+  function mapEntries() { return INTRAOP_GCKL_MAP.slice(); }
+  function mapByTask(taskId) {
+    return INTRAOP_GCKL_MAP.find(function (m) {
+      return m.taskId === taskId || (m.legacyTaskTags || []).indexOf(taskId) >= 0;
+    }) || null;
+  }
+  function mapByNodeEvidence(nodeId, evidenceKey) {
+    return INTRAOP_GCKL_MAP.filter(function (m) {
+      return m.nodeId === nodeId && (!evidenceKey || (m.requiredEvidence || []).indexOf(evidenceKey) >= 0);
+    });
+  }
+
+  normalizeNodeSchema();
 
   /* --------------------------------------------------------------------------
    * HESAPLAMA
@@ -523,8 +832,9 @@
     if (node.id === 'countSafety') {
       // evidence-bazlı puanlama (toplam max 12)
       var e = 0;
-      if (node.evidenceCollected.count_initial) e += node.evidenceScore.count_initial;
-      if (node.evidenceCollected.count_final)   e += node.evidenceScore.count_final;
+      if (node.evidenceCollected.count_initial)    e += node.evidenceScore.count_initial;
+      if (node.evidenceCollected.count_additional) e += node.evidenceScore.count_additional;
+      if (node.evidenceCollected.count_final)      e += node.evidenceScore.count_final;
       return e;
     }
     if (node.status === 'complete') return node.scoreImpact.correct;
@@ -571,12 +881,18 @@
       nodeReport[id] = {
         id: id, label: n.label, status: n.status,
         earned: e, max: n.max, lost: n.scoreLost,
+        scoreEarned: e, scoreLost: n.scoreLost, bonusEarned: n.bonusEarned,
         prereqsMet: nodePrereqsMet(n),
         evidence: Object.keys(n.evidenceCollected),
+        evidenceCollected: Object.assign({}, n.evidenceCollected),
+        evidenceMap: Object.assign({}, n.evidenceCollected),
         rationale: n.rationaleAnswered
           ? { answered: true, correct: n.rationaleCorrect }
           : { answered: false },
-        breach: n.barrierBreach
+        rationaleAnswer: (typeof n.rationaleAnswer === 'number') ? n.rationaleAnswer : null,
+        stopAwarded: !!n.stoppedCorrectly,
+        breach: n.barrierBreach,
+        barrierBreach: n.barrierBreach
       };
     });
 
@@ -603,7 +919,8 @@
       missingCritical: missingCritical,
       nodes: nodeReport,
       canStartIncision: canStartIncision(),
-      canCloseSignout: canCloseSignout()
+      canCloseSignout: canCloseSignout(),
+      canAdvancePostop: canAdvancePostop()
     };
   }
 
@@ -644,6 +961,7 @@
 
     n.rationaleAnswered = true;
     n.rationaleCorrect = !!opt.correct;
+    n.rationaleAnswer = optionIndex;
 
     var result = {
       nodeId: nodeId, correct: !!opt.correct,
@@ -747,6 +1065,24 @@
     return { ok: missing.length === 0, missing: missing };
   }
 
+  function canAdvancePostop() {
+    var missing = [];
+    Object.keys(NODES).forEach(function (id) {
+      var node = NODES[id];
+      if (!node || !node.hardStop) return;
+      var req = node.requiredEvidence || [];
+      if (id === 'countSafety') req = ['count_initial', 'count_final'];
+      var missingEv = req.filter(function (ev) { return !node.evidenceCollected[ev]; });
+      if (missingEv.length) {
+        missing.push({ id: id, label: node.label, evidence: missingEv });
+      }
+      if (node.barrierBreach) {
+        missing.push({ id: id, label: node.label + ' (bariyer ihlali)', evidence: [] });
+      }
+    });
+    return { ok: missing.length === 0, missing: missing };
+  }
+
   /* --------------------------------------------------------------------------
    * RESET
    * ------------------------------------------------------------------------ */
@@ -757,6 +1093,7 @@
       n.evidenceCollected = {};
       n.rationaleAnswered = false;
       n.rationaleCorrect = null;
+      n.rationaleAnswer = null;
       n.stoppedCorrectly = false;
       n.scoreEarned = 0;
       n.scoreLost = 0;
@@ -770,6 +1107,10 @@
    * ------------------------------------------------------------------------ */
   function getNode(id) { return NODES[id] || null; }
   function getAll()    { return NODES; }
+  function getDefinitions() { return NODES; }
+  function getMap() { return mapEntries(); }
+  function getMapEntryByTask(taskId) { return mapByTask(taskId); }
+  function getMapEntriesByNodeEvidence(nodeId, evidenceKey) { return mapByNodeEvidence(nodeId, evidenceKey); }
   function getCategories() { return CATEGORIES; }
   function getBarriers() { return { incision: INCISION_BARRIERS.slice(), close: CLOSE_BARRIERS.slice() }; }
 
@@ -784,13 +1125,21 @@
     markCorrectStop:  markCorrectStop,
     canStartIncision: canStartIncision,
     canCloseSignout:  canCloseSignout,
+    canAdvancePostop: canAdvancePostop,
     getNode:          getNode,
     getAll:           getAll,
+    getDefinitions:   getDefinitions,
+    getMap:           getMap,
+    getMapEntryByTask:getMapEntryByTask,
+    getMapEntriesByNodeEvidence: getMapEntriesByNodeEvidence,
     getCategories:    getCategories,
     getBarriers:      getBarriers,
     reset:            reset,
+    NODES:            NODES,
+    MAP:              INTRAOP_GCKL_MAP,
     _NODES:           NODES,
-    _version:         '1.0.0-intraop-gckl'
+    _MAP:             INTRAOP_GCKL_MAP,
+    _version:         '1.1.0-intraop-gckl-map'
   };
 
 })(typeof window !== 'undefined' ? window : globalThis);
