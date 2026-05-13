@@ -37,16 +37,18 @@
     equipmentAndFireSafety:     ['esu_pad_position', 'antiseptic_dry', 'fire_triangle_assessed'],
     sterileFieldAndTraffic:     ['sterile_field_intact', 'traffic_controlled'],
     positioningAndTemperature:  ['positioning_safe', 'active_warming_on'],
-    countSafety:                ['count_initial', 'count_final'],
+    countSafety:                ['count_initial', 'count_additional', 'count_final'],
     specimenAndEquipmentIssue:  ['specimen_labeled', 'equipment_issues_reported'],
-    signOutHandoff:             ['procedure_announced', 'count_final_confirmed', 'specimen_confirmed', 'equipment_issues_announced', 'postop_critical_plan']
+    signOutHandoff:             ['procedure_announced', 'count_final_confirmed', 'specimen_confirmed', 'equipment_issues_announced', 'postop_critical_plan'],
+    cabgCpbSafety:              ['cpb_machine_ready', 'perfusion_team_ready', 'heparin_act_plan_shared'],
+    teamCommunication:          ['roles_confirmed', 'closed_loop_confirmed']
   };
 
   const NODE_SCORE = {
     timeOutTeam: 5, patientProcedureSite: 6, imagingAndResults: 4, antibioticProphylaxis: 5,
     anesthesiaSafety: 10, bloodLossRisk: 10, equipmentAndFireSafety: 8,
     sterileFieldAndTraffic: 6, positioningAndTemperature: 6, countSafety: 12,
-    specimenAndEquipmentIssue: 8, signOutHandoff: 10
+    specimenAndEquipmentIssue: 8, signOutHandoff: 10, cabgCpbSafety: 5, teamCommunication: 5
   };
 
   const NODE_HARDSTOP = {
@@ -54,7 +56,8 @@
     antibioticProphylaxis: 'conditional', anesthesiaSafety: false, bloodLossRisk: false,
     equipmentAndFireSafety: 'conditional', sterileFieldAndTraffic: false,
     positioningAndTemperature: 'conditional', countSafety: true,
-    specimenAndEquipmentIssue: false, signOutHandoff: true
+    specimenAndEquipmentIssue: false, signOutHandoff: true,
+    cabgCpbSafety: false, teamCommunication: false
   };
 
   // =================================================================
@@ -87,8 +90,8 @@
         { ev: 'team_attention', label: 'Ekip üyeleri ad/rol ile doğrulandı' },
         { ev: 'team_attention', label: 'Dikkat dağıtıcılar durduruldu' }
       ],
-      hardStop: 'conditional',
-      severity: 'warning',
+      hardStop: true,
+      severity: 'danger',
       clinicalEvidence: {
         source: 'WHO Surgical Safety Checklist (Time-Out); AORN Guidelines for Team Communication 2024.',
         note: 'Time-out ekibin aktif sözel katılımı sağlanmadan tamamlanmış sayılmaz; dikkat dağınıklığında önce tekrar yaptırma, sonra hard-stop.'
@@ -96,7 +99,7 @@
       gcklMapping: {
         node: 'timeOutTeam', taskTag: 't_timeout',
         clinicalKey: 'time-out', gcklItem: 'Ekip üyeleri kendini tanıtır; görev ve roller netleşir.',
-        scoreWeight: 5, hardStop: 'conditional'
+        scoreWeight: 5, hardStop: true
       },
       microScenario: {
         title: 'Dağınık ekipte time-out',
@@ -116,37 +119,38 @@
     },
 
     'or-team-figures': {
-      node: 'timeOutTeam', taskTag: 't_timeout',
+      node: 'teamCommunication', taskTag: 'intraop_communication_handoff',
       title: 'EKİP KATILIMI VE ROL NETLİĞİ',
       subtitle: 'Güvenli cerrahi, ekip üyelerinin aktif katılımıyla başlar.',
       chips: ['Ekip', 'Rol netliği', 'WHO SSC'],
       category: 'timeoutVerification',
       role: 'Tüm ekip. Sirküle hemşire koordinasyonu sağlar.',
-      gcklItem: 'Tüm ekip üyeleri kendini tanıtır ve rolünü netleştirir.',
+      gcklItem: 'Kapali dongu iletisim ve rol netligi.',
       desc: 'Ameliyat başlamadan önce ekip üyelerinin kim olduğu, görev rolü ve kritik sorumlulukları açık olmalıdır.',
-      linkedTask: 'Time-out sırasında ekip rol doğrulamasını tamamla.',
+      linkedTask: 'Kapali dongu ekip iletisimini ve rol netligini dogrula.',
       warning: 'Rol belirsizliği acil durumda iletişim gecikmesine yol açar.',
       failureMode: 'Ekip üyelerinin aktif katılımı olmadan time-out\'un tamamlanması.',
       successCriteria: 'Cerrah, anestezi, scrub, sirküle ve ilgili personel time-out\'a aktif katılır.',
       prerequisites: [],
       buttons: [
-        { ev: 'team_attention', label: 'Ekip üyeleri ad ve rolle tanıtıldı' }
+        { ev: 'roles_confirmed', label: 'Ekip uyeleri ad ve rolle tanitildi' },
+        { ev: 'closed_loop_confirmed', label: 'Kapali dongu iletisim dogrulandi' }
       ],
       checklist: [
-        { ev: 'team_attention', label: 'Cerrah ve anestezi ekibi katıldı' },
-        { ev: 'team_attention', label: 'Scrub ve sirküle rolü netleşti' },
-        { ev: 'team_attention', label: 'Ekip iletişimi kuruldu' }
+        { ev: 'roles_confirmed', label: 'Cerrah ve anestezi ekibi katildi' },
+        { ev: 'roles_confirmed', label: 'Scrub ve sirkule rolu netlesti' },
+        { ev: 'closed_loop_confirmed', label: 'Ekip iletisimi kapali dongu ile kuruldu' }
       ],
-      hardStop: 'conditional',
+      hardStop: false,
       severity: 'info',
       clinicalEvidence: {
         source: 'WHO Surgical Safety Checklist; AORN Team Communication 2024.',
         note: 'Rol netliği acil ekip yanıtı için ön koşuldur.'
       },
       gcklMapping: {
-        node: 'timeOutTeam', taskTag: 't_timeout',
-        clinicalKey: 'or-team-figures', gcklItem: 'Ekip rol netliği.',
-        scoreWeight: 5, hardStop: 'conditional'
+        node: 'teamCommunication', taskTag: 'intraop_communication_handoff',
+        clinicalKey: 'or-team-figures', gcklItem: 'Kapali dongu iletisim ve rol netligi.',
+        scoreWeight: 5, hardStop: false
       },
       microScenario: {
         title: 'Yeni ekip üyesi',
@@ -825,6 +829,58 @@
       aiHintPrompt: 'Bu hasta için cell saver kullanım önerisi (KPB tekniğine girme).'
     },
 
+    'cpb-machine': {
+      node: 'cabgCpbSafety', taskTag: 'intraop_cabg_cpb_safety',
+      title: 'CABG / CPB HAZIRLIK GUVENLIGI',
+      subtitle: 'CABG aktifse perfuzyon ve KPB hazirligi ekipce dogrulanir.',
+      chips: ['CABG', 'CPB', 'Perfuzyon'],
+      category: 'cabgCpbSafety',
+      role: 'Cerrah, anestezi, perfuzyonist ve sirkule hemsire.',
+      gcklItem: 'CABG olgusunda kardiyopulmoner bypass hazirligi.',
+      desc: 'CPB makinesi, perfuzyon ekibi ve heparin/ACT plani paylasilmadan CABG guvenli kabul edilmez.',
+      linkedTask: 'CABG/CPB hazirligini dogrula.',
+      warning: 'KPB hazirligi ekipce dogrulanmadan CABG akisina gecmek gecikme ve kritik guvenlik riski olusturur.',
+      failureMode: 'CPB cihazinin sahnede olmasini hazirlik dogrulamasi sanmak.',
+      successCriteria: 'CPB makinesi hazir, perfuzyon ekibi hazir ve heparin/ACT plani ekipce paylasilmistir.',
+      prerequisites: ['patientProcedureSite', 'timeOutTeam'],
+      buttons: [
+        { ev: 'cpb_machine_ready', label: 'CPB makinesi hazirligini dogrula' },
+        { ev: 'perfusion_team_ready', label: 'Perfuzyon ekibi hazirligini dogrula' },
+        { ev: 'heparin_act_plan_shared', label: 'Heparin / ACT planini ekipce paylas' }
+      ],
+      checklist: [
+        { ev: 'cpb_machine_ready', label: 'CPB makinesi ve hatlar hazir' },
+        { ev: 'perfusion_team_ready', label: 'Perfuzyonist ve ekip rol paylasimi tamam' },
+        { ev: 'heparin_act_plan_shared', label: 'Heparin / ACT plani paylasildi' }
+      ],
+      hardStop: false,
+      severity: 'danger',
+      clinicalEvidence: {
+        source: 'WHO SSC cardiac adaptation; CABG team readiness practice.',
+        note: 'CABG icin perfuzyon ve antikoagulasyon plani ekip time-out akisi ile birlikte netlestirilir.'
+      },
+      gcklMapping: {
+        node: 'cabgCpbSafety', taskTag: 'intraop_cabg_cpb_safety',
+        clinicalKey: 'cpb-machine', gcklItem: 'CABG/CPB hazirligi.',
+        scoreWeight: 5, hardStop: false
+      },
+      microScenario: {
+        title: 'CPB hazirligi belirsiz',
+        scenarioText: 'CABG olgusunda CPB cihazı sahnede ama heparin/ACT plani sesli paylasilmadi.',
+        questionText: 'Ne yapilmali?',
+        options: [
+          'Cihaz varsa hazir kabul edilir.',
+          'Cerrah, anestezi ve perfuzyonist CPB ve heparin/ACT planini ekipce dogrular.',
+          'Plan sadece perfuzyonist tarafindan bilinse yeterlidir.',
+          'Postop kayda eklenir.'
+        ],
+        correctIndex: 1,
+        correctFeedback: 'Dogru. CABG guvenligi ekip paylasimli hazirlik gerektirir.',
+        wrongFeedback: 'Yanlis. CPB varligi, ekipce dogrulanmis hazirlik anlamina gelmez.'
+      },
+      aiHintPrompt: 'Bu CABG vakasi icin CPB hazirligi odakli 1 cumle ipucu.'
+    },
+
     /* ====== G) CİHAZ / YANGIN / DUMAN (equipmentAndFireSafety) ====== */
 
     'esu-unit': {
@@ -1448,12 +1504,15 @@
       successCriteria: 'Başlangıç sayımı ve kapanış sayımı doğrulanır; tutarsızlık yoktur.',
       prerequisites: ['patientProcedureSite'],
       buttons: [
-        { ev: 'count_initial', label: 'Açılış sayımını yap (çift hemşire)' }
+        { ev: 'count_initial', label: 'Acilis sayimini yap (cift hemsire)' },
+        { ev: 'count_additional', label: 'Eklenen materyal sayimini guncelle' },
+        { ev: 'count_final', label: 'Kapanis sayimini dogrula' }
       ],
       checklist: [
-        { ev: 'count_initial', label: 'Başlangıç sayımı tamamlandı' },
-        { ev: 'count_final',   label: 'Kapanış sayımı tamamlandı' },
-        { ev: 'count_final',   label: 'Tutarsızlık yok' }
+        { ev: 'count_initial', label: 'Baslangic sayimi tamamlandi' },
+        { ev: 'count_additional', label: 'Ek materyal veya personel degisim sayimi guncellendi' },
+        { ev: 'count_final',   label: 'Kapanis sayimi tamamlandi' },
+        { ev: 'count_final',   label: 'Tutarsizlik yok' }
       ],
       hardStop: true,
       severity: 'danger',
@@ -1462,7 +1521,7 @@
         note: 'RSI sentinel olaydır; sayım uyumsuzluğunda kavite kapatılmaz.'
       },
       gcklMapping: {
-        node: 'countSafety', taskTag: 't_count_initial+t_count_final',
+        node: 'countSafety', taskTag: 'intraop_initial_count+intraop_additional_count+intraop_final_count',
         clinicalKey: 'count-board', gcklItem: 'Alet/spanç/iğne sayımı.',
         scoreWeight: 12, hardStop: true
       },
@@ -1623,13 +1682,15 @@
     'blood-loss-board': 'rapid-infuser',
     'cabg-anaesthesia-module': 'blood-bags',  // CABG paneli kan kaybı içerikli
     'iv-pump-intraop': 'rapid-infuser',
-    'perfusionist': 'cell-saver',
+    'perfusionist': 'cpb-machine',
+    'perfusion-console': 'cpb-machine',
+    'cpb-phase-board': 'cpb-machine',
 
     // equipmentAndFireSafety
     'electrocautery': 'esu-unit',
     'esu-footswitch': 'esu-unit',
     'return-electrode': 'esu-pad',
-    'cpb-machine': 'esu-unit',  // KPB ekipman güvenliği
+    'cpb-machine': 'cpb-machine',
 
     // sterileFieldAndTraffic
     'mayo-table': 'mayo-stand',
@@ -1694,18 +1755,20 @@
   // Network ile birebir uyumlu taskTag → node kataloğu
   // (HTML içindeki TAG_MAP IIFE-kapalı olduğu için yerel kopya tutuyoruz)
   var NODE_TAGS = {
-    timeOutTeam:               ['t_timeout'],
-    patientProcedureSite:      ['t_site_procedure_verify'],
+    timeOutTeam:               ['t_timeout', 'intraop_team_timeout'],
+    patientProcedureSite:      ['t_site_procedure_verify', 'intraop_identity_procedure'],
     imagingAndResults:         ['t_imaging_intraop'],
-    antibioticProphylaxis:     ['t_antibiotic'],
-    anesthesiaSafety:          ['t_anesthesia_assist'],
+    antibioticProphylaxis:     ['t_antibiotic', 'intraop_allergy_antibiotic'],
+    anesthesiaSafety:          ['t_anesthesia_assist', 'intraop_anaesthesia_safety'],
     bloodLossRisk:             ['t_fluid_blood'],
-    equipmentAndFireSafety:    ['t_equipment', 't_antiseptic'],
-    sterileFieldAndTraffic:    ['t_sterile_field'],
+    equipmentAndFireSafety:    ['t_equipment', 't_antiseptic', 'intraop_equipment_fire_safety'],
+    sterileFieldAndTraffic:    ['t_sterile_field', 'intraop_sterile_field'],
     positioningAndTemperature: ['t_position', 't_temp'],
-    countSafety:               ['t_count_initial', 't_count_final'],
-    specimenAndEquipmentIssue: ['t_specimen'],
-    signOutHandoff:            ['t_signout']
+    countSafety:               ['t_count_initial', 't_count_additional', 't_count_final', 'intraop_initial_count', 'intraop_additional_count', 'intraop_final_count'],
+    specimenAndEquipmentIssue: ['t_specimen', 'intraop_specimen_safety'],
+    signOutHandoff:            ['t_signout'],
+    cabgCpbSafety:             ['t_cabg_cpb_ready', 'intraop_cabg_cpb_safety'],
+    teamCommunication:         ['t_team_communication', 'intraop_communication_handoff']
   };
 
   function validateIntraPopups() {
@@ -2212,7 +2275,10 @@
     var snap = getNodeSnap(nodeId);
     var status = (snap && snap.status) || 'pending';
     var breach = !!(snap && snap.barrierBreach);
-    var evState = (snap && snap.evidence) || {};
+    var rawEv = (snap && (snap.evidenceCollected || snap.evidenceMap || snap.evidence)) || {};
+    var evState = Array.isArray(rawEv)
+      ? rawEv.reduce(function (acc, key) { acc[key] = true; return acc; }, {})
+      : rawEv;
 
     var validEvs = NODE_EV[nodeId] || [];
     var doneCount = validEvs.reduce(function (a, e) { return a + (evState[e] ? 1 : 0); }, 0);
@@ -2429,7 +2495,11 @@
           alert('Önce tamamlanması gereken adımlar var:\n• ' + prereq.missing.join('\n• '));
           return;
         }
-        net.markEvidence(nodeId, btn.dataset.ev);
+        if (typeof window.intraGcklOnEvidence === 'function') {
+          window.intraGcklOnEvidence(nodeId, btn.dataset.ev, obj || { opts: { clinicalKey: clinicalKey } });
+        } else {
+          net.markEvidence(nodeId, btn.dataset.ev);
+        }
         try { showSceneReaction && showSceneReaction(card.title + ': adım kaydedildi.', 'ok'); } catch(e) {}
         refreshIntraopGcklViews('evidence:' + btn.dataset.ev);
         renderIntraProtocolCard(card, clinicalKey, obj, null, null);

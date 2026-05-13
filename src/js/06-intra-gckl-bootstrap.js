@@ -10,6 +10,13 @@
 
   const IG = window.IntraopGCKL;
 
+  function ensureAppAlias() {
+    try {
+      if (!window.App && typeof App !== 'undefined') window.App = App;
+    } catch(e) {}
+    return window.App || null;
+  }
+
   // ADIM 9: lokal esc — harita HTML'inde kullanılır
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -24,23 +31,47 @@
   const TAG_MAP = {
     // GCKL ana akışı
     't_timeout':                { node: 'timeOutTeam' },
+    'intraop_team_timeout':     { node: 'timeOutTeam', evidence: 'team_attention' },
     't_site_procedure_verify':  { node: 'patientProcedureSite' },
+    'intraop_identity_procedure': { node: 'patientProcedureSite' },
     't_imaging_intraop':        { node: 'imagingAndResults' },
     't_antibiotic':             { node: 'antibioticProphylaxis' },
+    'intraop_allergy_antibiotic': { node: 'antibioticProphylaxis' },
     't_anesthesia_assist':      { node: 'anesthesiaSafety' },
+    'intraop_anaesthesia_safety': { node: 'anesthesiaSafety' },
     't_fluid_blood':            { node: 'bloodLossRisk' },
     't_equipment':              { node: 'equipmentAndFireSafety', evidence: 'esu_pad_position' },
     't_antiseptic':             { node: 'equipmentAndFireSafety', evidence: 'antiseptic_dry' },
+    'intraop_equipment_fire_safety': { node: 'equipmentAndFireSafety' },
     't_sterile_field':          { node: 'sterileFieldAndTraffic' },
+    'intraop_sterile_field':    { node: 'sterileFieldAndTraffic' },
     't_position':               { node: 'positioningAndTemperature', evidence: 'positioning_safe' },
     't_temp':                   { node: 'positioningAndTemperature', evidence: 'active_warming_on' },
     't_count_initial':          { node: 'countSafety',    evidence: 'count_initial' },
+    't_count_additional':       { node: 'countSafety',    evidence: 'count_additional' },
     't_count_final':            { node: 'countSafety',    evidence: 'count_final' },
+    'intraop_initial_count':    { node: 'countSafety',    evidence: 'count_initial' },
+    'intraop_additional_count': { node: 'countSafety',    evidence: 'count_additional' },
+    'intraop_final_count':      { node: 'countSafety',    evidence: 'count_final' },
     't_specimen':               { node: 'specimenAndEquipmentIssue' },
-    't_signout':                { node: 'signOutHandoff' }
+    'intraop_specimen_safety':  { node: 'specimenAndEquipmentIssue', evidence: 'specimen_labeled' },
+    't_signout':                { node: 'signOutHandoff' },
+    't_cabg_cpb_ready':         { node: 'cabgCpbSafety' },
+    'intraop_cabg_cpb_safety':  { node: 'cabgCpbSafety' },
+    't_team_communication':     { node: 'teamCommunication' },
+    'intraop_communication_handoff': { node: 'teamCommunication' }
   };
 
-  function mapForTag(tag) { return TAG_MAP[tag] || null; }
+  function mapEntryForTask(taskId) {
+    if (IG.getMapEntryByTask) return IG.getMapEntryByTask(taskId) || null;
+    return null;
+  }
+
+  function mapForTag(tag) {
+    const entry = mapEntryForTask(tag);
+    if (entry) return { node: entry.nodeId, evidenceList: (entry.requiredEvidence || []).slice(), entry: entry };
+    return TAG_MAP[tag] || null;
+  }
 
   // === Kategori köprüsü (App.scores delta-push) ===
   // intraop ağ kategorileri → mevcut SCORE_CATEGORIES (varsa) ya da App.scoreCats
@@ -102,6 +133,78 @@
     Object.keys(IG.getAll()).forEach(pushDelta);
   }
 
+  function currentIntraopTasks() {
+    return (window.App && window.App.currentPatient && window.App.currentPatient.intraop && window.App.currentPatient.intraop.tasks) || [];
+  }
+
+  function taskIsComplete(taskId) {
+    return !!(window.App && Array.isArray(window.App.completedTasks) && window.App.completedTasks.indexOf(taskId) >= 0);
+  }
+
+  function markTaskCompleteSilent(taskId, sourceObj) {
+    if (!taskId || !window.App) return false;
+    window.App.completedTasks = window.App.completedTasks || [];
+    if (window.App.completedTasks.indexOf(taskId) < 0) window.App.completedTasks.push(taskId);
+    try { if (window.NurseKitSM && window.NurseKitSM.shadowComplete) window.NurseKitSM.shadowComplete(taskId, sourceObj || null); } catch(e) {}
+    return true;
+  }
+
+  function addGlobalGcklEvidence(entry, sourceLabel) {
+    if (!entry || !Array.isArray(entry.gcklItems)) return;
+    entry.gcklItems.forEach(function (itemId) {
+      try {
+        if (typeof window.addGCKLEvidence === 'function') {
+          window.addGCKLEvidence(itemId, {
+            source: 'intraop-gckl',
+            id: entry.id,
+            taskId: entry.taskId,
+            label: sourceLabel || entry.taskLabel || entry.label || entry.id
+          });
+        }
+      } catch(e) {}
+    });
+    (entry.gcklTaskIds || []).forEach(function (taskId) { markTaskCompleteSilent(taskId, null); });
+  }
+
+  function entryEvidenceMet(entry) {
+    const node = entry && IG.getNode(entry.nodeId);
+    if (!node) return false;
+    return (entry.requiredEvidence || []).every(function (ev) {
+      return !!node.evidenceCollected[ev];
+    });
+  }
+
+  function completeEntryTask(entry, sourceObj, silent) {
+    if (!entry || !entry.taskId) return false;
+    if (!entryEvidenceMet(entry)) return false;
+    addGlobalGcklEvidence(entry, entry.taskLabel);
+    if (taskIsComplete(entry.taskId)) return true;
+    const task = currentIntraopTasks().find(function (t) { return t.id === entry.taskId; });
+    if (!task) return markTaskCompleteSilent(entry.taskId, sourceObj || null);
+    if (!silent && typeof window.completeTask === 'function') {
+      try {
+        const ok = window.completeTask(entry.taskId, sourceObj || { label: entry.taskLabel, opts: { clinicalKey: (entry.linkedObjects || [])[0] || entry.id } });
+        if (ok) return true;
+      } catch(e) {}
+    }
+    return markTaskCompleteSilent(entry.taskId, sourceObj || null);
+  }
+
+  function markEntryEvidence(entry) {
+    if (!entry) return false;
+    (entry.requiredEvidence || []).forEach(function (ev) { IG.markEvidence(entry.nodeId, ev); });
+    return true;
+  }
+
+  function refreshAllIntraopViews(reason) {
+    try { syncAll(); } catch(e) {}
+    try { refreshMap(); } catch(e) {}
+    try { if (typeof window.gcklBoardSyncMarkerState === 'function') window.gcklBoardSyncMarkerState(); } catch(e) {}
+    try { if (typeof window.updateProgressBar === 'function') window.updateProgressBar(); } catch(e) {}
+    try { if (typeof window.updateScoreStrip === 'function') window.updateScoreStrip(); } catch(e) {}
+    try { if (window.IntraopGcklReport && typeof window.IntraopGcklReport.inject === 'function') window.IntraopGcklReport.inject(); } catch(e) {}
+  }
+
   // === Toastlar ===
   function toast(kind, title, body, pts) {
     const colors = kind === 'ok'
@@ -125,10 +228,29 @@
   window.intraGcklOnTaskComplete = function (tag) {
     const m = mapForTag(tag);
     if (!m) return null;
-    IG.completeNode(m.node, m.evidence);  // evidence yoksa "complete"
+    if (m.entry) {
+      markEntryEvidence(m.entry);
+      completeEntryTask(m.entry, null, true);
+    } else if (m.evidenceList && m.evidenceList.length) {
+      m.evidenceList.forEach(function (ev) { IG.completeNode(m.node, ev); });
+    } else {
+      IG.completeNode(m.node, m.evidence);
+    }
     pushDelta(m.node);
-    refreshMap();
-    return { node: m.node, evidence: m.evidence || null };
+    refreshAllIntraopViews('task:' + tag);
+    return { node: m.node, evidence: m.evidence || m.evidenceList || null };
+  };
+
+  window.intraGcklOnEvidence = function (nodeId, evidenceKey, sourceObj) {
+    if (!nodeId || !evidenceKey) return null;
+    IG.markEvidence(nodeId, evidenceKey);
+    const entries = IG.getMapEntriesByNodeEvidence
+      ? IG.getMapEntriesByNodeEvidence(nodeId, evidenceKey)
+      : [];
+    entries.forEach(function (entry) { completeEntryTask(entry, sourceObj || null, false); });
+    pushDelta(nodeId);
+    refreshAllIntraopViews('evidence:' + evidenceKey);
+    return { node: nodeId, evidence: evidenceKey, entries: entries.map(function (e) { return e.id; }) };
   };
 
   window.intraGcklAnswerRationale = function (nodeId, optionIndex) {
@@ -144,19 +266,20 @@
         : (n.label + ' — Eksik/yanlış klinik karar');
       toast('bad', 'Yanlış klinik karar', msg, r.scoreDelta);
     }
-    refreshMap();
+    refreshAllIntraopViews('rationale:' + nodeId);
     return r;
   };
 
   window.intraGcklMarkStop = function (nodeId) {
     const r = IG.markCorrectStop(nodeId);
     pushDelta(nodeId);
-    refreshMap();
+    refreshAllIntraopViews('stop:' + nodeId);
     return r;
   };
 
   window.intraGcklCompute   = function () { return IG.compute(); };
   window.intraGcklSyncAll   = syncAll;
+  window.intraGcklMap       = function () { return IG.getMap ? IG.getMap() : []; };
   window.intraGcklReset     = function () { IG.reset(); Object.keys(SYNCED).forEach(k => SYNCED[k] = { earned:0, lost:0, bonus:0 }); refreshMap(); };
 
   // === FAZ KİLİDİ ===
@@ -172,21 +295,29 @@
     const original = window.getPhaseAdvanceBlocker;
     window.getPhaseAdvanceBlocker = function (phaseName) {
       if (phaseName === 'intraop') {
-        const close = IG.canCloseSignout();
+        const close = IG.canAdvancePostop ? IG.canAdvancePostop() : IG.canCloseSignout();
         if (!close.ok) {
           return {
-            source: 'intra-gckl-network',
+            source: 'gckl',
             blocked: true,
             severity: 'pendingCritical',
             title: '⚠ Sign-out / kapanış bariyerleri eksik',
             message: 'Şu kritik bariyerler tamamlanmadan postopa geçilemez: ' +
               close.missing.map(m => m.label).join(', '),
+            rule: {
+              key: 'intraopGcklHardStop',
+              title: 'Intraop GCKL hard-stop eksik',
+              description: 'Postopa gecis icin su intraop hard-stop maddeleri tamamlanmali: ' +
+                close.missing.map(m => m.label).join(', '),
+              gcklId: 'INTRAOP-GCKL'
+            },
             details: close
           };
         }
       }
       return original.apply(this, arguments);
     };
+    try { getPhaseAdvanceBlocker = window.getPhaseAdvanceBlocker; } catch(e) {}
   }
 
   function installAdvanceWrapper() {
@@ -199,7 +330,7 @@
     const original = window.advancePhase;
     window.advancePhase = function () {
       if (window.App && window.App.currentRoom === 'intraop') {
-        const close = IG.canCloseSignout();
+        const close = IG.canAdvancePostop ? IG.canAdvancePostop() : IG.canCloseSignout();
         if (!close.ok) {
           const msg = 'Sign-out / kapanış için eksik bariyerler:\n• ' +
             close.missing.map(m => m.label).join('\n• ');
@@ -213,6 +344,33 @@
       }
       return original.apply(this, arguments);
     };
+    try { advancePhase = window.advancePhase; } catch(e) {}
+  }
+
+  function installSwitchRoomWrapper() {
+    if (typeof window.switchRoom !== 'function') {
+      setTimeout(installSwitchRoomWrapper, 500);
+      return;
+    }
+    if (window.__intraGcklSwitchWrapped) return;
+    window.__intraGcklSwitchWrapped = true;
+    const original = window.switchRoom;
+    window.switchRoom = function (rid) {
+      if (window.App && window.App.currentRoom === 'intraop' && rid === 'postop' && window.NK_BYPASS_GATE !== true) {
+        const close = IG.canAdvancePostop ? IG.canAdvancePostop() : IG.canCloseSignout();
+        if (!close.ok) {
+          const msg = 'Postopa gecis icin eksik intraop GCKL hard-stop: ' +
+            close.missing.map(m => m.label).join(', ');
+          try { if (typeof window.showSceneReaction === 'function') window.showSceneReaction(msg, 'warn'); } catch(e) {}
+          try { if (typeof window.toast === 'function') window.toast('error', 'Postop gecisi kilitli', msg); } catch(e) {}
+          return;
+        }
+      }
+      const result = original.apply(this, arguments);
+      if (rid === 'intraop') setTimeout(function () { refreshAllIntraopViews('switchRoom:intraop'); }, 0);
+      return result;
+    };
+    try { switchRoom = window.switchRoom; } catch(e) {}
   }
 
   // === completeTask SARMASI ===
@@ -231,13 +389,21 @@
       if (window.App && window.App.currentRoom === 'intraop') {
         const m = mapForTag(taskId);
         if (m) {
-          IG.completeNode(m.node, m.evidence);
+          if (m.entry) {
+            markEntryEvidence(m.entry);
+            completeEntryTask(m.entry, arguments[1] || null, true);
+          } else if (m.evidenceList && m.evidenceList.length) {
+            m.evidenceList.forEach(function (ev) { IG.completeNode(m.node, ev); });
+          } else {
+            IG.completeNode(m.node, m.evidence);
+          }
           pushDelta(m.node);
-          refreshMap();
+          refreshAllIntraopViews('completeTask:' + taskId);
         }
       }
       return result;
     };
+    try { completeTask = window.completeTask; } catch(e) {}
   }
 
   // === İNTRAOP GCKL HARİTASI === ADIM 9
@@ -312,7 +478,9 @@
     positioningAndTemperature: 'forced-air-warmer',
     countSafety:               'count-board',
     specimenAndEquipmentIssue: 'specimen-container',
-    signOutHandoff:            'signout-checklist'
+    signOutHandoff:            'signout-checklist',
+    cabgCpbSafety:             'cpb-machine',
+    teamCommunication:         'or-team-figures'
   };
 
   function ensureMapPanel() {
@@ -341,7 +509,10 @@
         { id: 'equipmentAndFireSafety',   phase: null },
         { id: 'sterileFieldAndTraffic',   phase: null },
         { id: 'positioningAndTemperature',phase: null },
-        { id: 'countSafety',              phase: 'initial' }
+        { id: 'countSafety',              phase: 'initial' },
+        { id: 'countSafety',              phase: 'additional' },
+        { id: 'cabgCpbSafety',            phase: null },
+        { id: 'teamCommunication',        phase: null }
       ]
     },
     {
@@ -386,7 +557,10 @@
       missingLabels: statuses.filter(function (s) { return s.status !== 'complete'; })
         .map(function (s) {
           var lab = s.raw.label || s.id;
-          if (s.phase) lab += ' (' + (s.phase === 'initial' ? 'başlangıç' : 'kapanış') + ')';
+          if (s.phase) {
+            var phaseLabel = s.phase === 'initial' ? 'baslangic' : (s.phase === 'additional' ? 'ek materyal' : 'kapanis');
+            lab += ' (' + phaseLabel + ')';
+          }
           return lab;
         })
     };
@@ -434,7 +608,8 @@
     html += '<div class="igm9-pill ' + (breach ? 'bad' : (completedCount === totalNodes ? 'ok' : '')) + '">Tamamlanan <b>' + completedCount + '/' + totalNodes + '</b></div>';
     html += '<div class="igm9-pill ' + (breach ? 'bad' : 'ok') + '">Kritik ihlal <b>' + (breach ? 'VAR' : 'yok') + '</b></div>';
     html += '<div class="igm9-pill ' + (stops > 0 ? 'ok' : '') + '">Stop bonus <b>+' + (data.reasoningBonus || 0) + '</b></div>';
-    var postopOk = data.canCloseSignout && data.canCloseSignout.ok && !breach;
+    var postopGate = data.canAdvancePostop || data.canCloseSignout || {};
+    var postopOk = postopGate.ok && !breach;
     html += '<div class="igm9-pill ' + (postopOk ? 'ok' : 'bad') + '">Postop <b>' + (postopOk ? 'açık' : 'kilitli') + '</b></div>';
     html += '</div>';
 
@@ -471,7 +646,10 @@
 
         // Label + sub
         var lblText = raw.label || n.id;
-        if (n.phase) lblText += ' (' + (n.phase === 'initial' ? 'başlangıç' : 'kapanış') + ')';
+        if (n.phase) {
+          var phaseLabel = n.phase === 'initial' ? 'baslangic' : (n.phase === 'additional' ? 'ek materyal' : 'kapanis');
+          lblText += ' (' + phaseLabel + ')';
+        }
 
         var ptsText = (r.earned != null ? r.earned : 0) + '/' + (raw.max || 0);
 
@@ -522,7 +700,7 @@
     }
 
     // POSTOP GEÇİŞ DURUMU
-    var postopClose = data.canCloseSignout || { ok: false, missing: [] };
+    var postopClose = postopGate || { ok: false, missing: [] };
     if (postopOk) {
       html += '<div class="igm9-postop ok"><b>Postop geçiş durumu</b>Postop geçiş güvenli. Kapanış ve sign-out bariyerleri tamamlandı.</div>';
     } else {
@@ -565,6 +743,7 @@
       try { injectChipsAndMap(); } catch (e) { console.warn('[INTRA-GCKL] chip enjeksiyon hatası', e); }
       return r;
     };
+    try { renderRightPanel = window.renderRightPanel; } catch(e) {}
   }
 
   function injectChipsAndMap() {
@@ -641,9 +820,11 @@
 
   // === INIT ===
   function init() {
+    ensureAppAlias();
     injectChipStyles();
     installPhaseBlockerHook();
     installAdvanceWrapper();
+    installSwitchRoomWrapper();
     installCompleteTaskHook();
     installRightPanelHook();
     syncAll();

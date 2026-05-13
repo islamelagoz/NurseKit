@@ -10,8 +10,8 @@
   // ----- clinicalKey → nodeId (spec) -----
   var K2N = {
     'timeout-board': 'timeOutTeam',
-    'or-team-figures': 'timeOutTeam',
-    'surgical-team': 'timeOutTeam',
+    'or-team-figures': 'teamCommunication',
+    'surgical-team': 'teamCommunication',
     'patient-wristband': 'patientProcedureSite',
     'site-marking': 'patientProcedureSite',
     'consent-form': 'patientProcedureSite',
@@ -33,6 +33,10 @@
     'transfusion-panel': 'bloodLossRisk',
     'blood-loss-board': 'bloodLossRisk',
     'cell-saver': 'bloodLossRisk',
+    'cpb-machine': 'cabgCpbSafety',
+    'perfusionist': 'cabgCpbSafety',
+    'perfusion-console': 'cabgCpbSafety',
+    'cpb-phase-board': 'cabgCpbSafety',
     'esu-unit': 'equipmentAndFireSafety',
     'electrocautery': 'equipmentAndFireSafety',
     'antiseptic-bottle': 'equipmentAndFireSafety',
@@ -246,7 +250,10 @@
     var breach = !!(st.barrierBreach || nd.snap.barrierBreach);
     var hardStop = !!def.hardStop;
     var requiredEv = def.requiredEvidence || [];
-    var evState = st.evidence || {};
+    var rawEv = st.evidenceCollected || st.evidenceMap || st.evidence || {};
+    var evState = Array.isArray(rawEv)
+      ? rawEv.reduce(function (acc, key) { acc[key] = true; return acc; }, {})
+      : rawEv;
     var doneCount = 0;
     for (var i = 0; i < requiredEv.length; i++) if (evState[requiredEv[i]]) doneCount++;
     var pct = requiredEv.length ? Math.round(doneCount / requiredEv.length * 100) : 0;
@@ -393,7 +400,11 @@
       var net = getNet();
       if (!net) return;
       if (t.dataset.ev && net.markEvidence) {
-        net.markEvidence(nodeId, t.dataset.ev);
+        if (typeof window.intraGcklOnEvidence === 'function') {
+          window.intraGcklOnEvidence(nodeId, t.dataset.ev, obj || { opts: { clinicalKey: clinicalKey } });
+        } else {
+          net.markEvidence(nodeId, t.dataset.ev);
+        }
         renderIntraopGcklNodePopup(nodeId, obj, null, null);
       } else if (t.dataset.mcq != null && net.answerRationale) {
         net.answerRationale(nodeId, +t.dataset.mcq);

@@ -27907,17 +27907,157 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
 
 /* =====================================================================
    NK v9.63 — Inline intraop GCKL task patch
-   Adds the four missing intraop GCKL task cards inside the main app scope.
+   Adds explicit intraop GCKL task cards inside the main app scope.
    This runs before external/inline GCKL modules, while CASES is still in scope.
    ===================================================================== */
 (function nk963PatchIntraopGcklTasks(){
     try {
         if (typeof CASES === 'undefined' || !CASES) return;
         const tasksToAdd = [
-            { id:'t_site_procedure_verify', label:'Hasta / işlem / cerrahi bölge doğrulama', critical:true,  score:0, guideline:'who_ssc' },
-            { id:'t_imaging_intraop',       label:'Görüntüleme ve kritik sonuçların görünürlüğü', critical:false, score:0, guideline:'who_ssc' },
-            { id:'t_sterile_field',         label:'Steril alan ve oda trafiği kontrolü', critical:false, score:0, guideline:'who_ssc' },
-            { id:'t_specimen',              label:'Numune ve ekipman sorunu doğrulama', critical:false, score:0, guideline:'who_ssc' }
+            {
+                id:'intraop_identity_procedure',
+                label:'Confirm identity, procedure, site, and planned operation',
+                critical:true, score:0, guideline:'who_ssc', phase:'intraop',
+                role:'circulating_nurse', responsibleRole:'Circulating nurse + full team',
+                gcklNode:'patientProcedureSite', gcklMapId:'intraopIdentityProcedure',
+                gcklItems:['GCKL-10','GCKL-11','GCKL-18'],
+                linkedObjects:['patient','patient-wristband','patient-file','ssc-board-intraop','time-out'],
+                requiredEvidence:['identity_verbal','procedure_verbal','site_marking_visible'],
+                evidenceRule:'All identity/procedure/site evidence must be present before incision.',
+                phaseAdvancementImpact:'hardStop', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_team_timeout',
+                label:'Perform team time-out before incision',
+                critical:true, score:0, guideline:'who_ssc', phase:'intraop',
+                role:'team', responsibleRole:'Surgeon, anaesthesia, scrub nurse, circulating nurse',
+                gcklNode:'timeOutTeam', gcklMapId:'intraopTeamTimeOut',
+                gcklItems:['GCKL-17','GCKL-18','GCKL-19'],
+                linkedObjects:['time-out','or-team-figures','surgical-team','anesthesia-machine'],
+                requiredEvidence:['team_attention'],
+                evidenceRule:'Formal time-out evidence is required before incision.',
+                phaseAdvancementImpact:'hardStop', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_allergy_antibiotic',
+                label:'Confirm allergy and antibiotic status',
+                critical:true, score:0, guideline:'who_ssc', phase:'intraop',
+                role:'anaesthesia', responsibleRole:'Anaesthesia team + circulating nurse',
+                gcklNode:'antibioticProphylaxis', gcklMapId:'intraopAllergyAntibiotic',
+                gcklItems:['GCKL-14','GCKL-20'],
+                linkedObjects:['anesthesia-machine','antibiotic-syringe','medication-tray','patient-file'],
+                requiredEvidence:['antibiotic_time_verified','allergy_cross_checked'],
+                evidenceRule:'Allergy and prophylaxis evidence must both be present.',
+                phaseAdvancementImpact:'hardStop', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_anaesthesia_safety',
+                label:'Confirm anaesthesia safety readiness',
+                critical:false, score:0, guideline:'who_ssc', phase:'intraop',
+                role:'anaesthesia', responsibleRole:'Anaesthesia team',
+                gcklNode:'anesthesiaSafety', gcklMapId:'intraopAnaesthesiaSafety',
+                gcklItems:['GCKL-12','GCKL-13'],
+                linkedObjects:['anesthesia-machine','monitor','pulse-oximeter','airway-cart','iv-pump-intraop'],
+                requiredEvidence:['airway_secured','spo2_reliable','critical_risks_shared'],
+                evidenceRule:'Airway, monitoring, and critical-risk evidence complete the task.',
+                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_sterile_field',
+                label:'Verify sterile field integrity',
+                critical:false, score:0, guideline:'aorn', phase:'intraop',
+                role:'scrub', responsibleRole:'Scrub nurse + circulating nurse',
+                gcklNode:'sterileFieldAndTraffic', gcklMapId:'intraopSterileField',
+                gcklItems:['GCKL-22'],
+                linkedObjects:['mayo-stand','mayo-table','sterile-drape','back-table','scrub-nurse'],
+                requiredEvidence:['sterile_field_intact','traffic_controlled'],
+                evidenceRule:'Sterile field and traffic-control evidence complete the task.',
+                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_initial_count',
+                label:'Perform initial surgical count',
+                critical:true, score:0, guideline:'aorn', phase:'intraop',
+                role:'scrub', responsibleRole:'Scrub nurse + circulating nurse',
+                gcklNode:'countSafety', gcklMapId:'intraopInitialCount',
+                gcklItems:['GCKL-27'],
+                linkedObjects:['count-board','scrub-nurse','circulating-nurse','mayo-stand'],
+                requiredEvidence:['count_initial'],
+                evidenceRule:'Initial instrument/sponge/sharp count evidence is required.',
+                phaseAdvancementImpact:'hardStop', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_additional_count',
+                label:'Update count when additional materials are introduced',
+                critical:false, score:0, guideline:'aorn', phase:'intraop',
+                role:'circulating_nurse', responsibleRole:'Circulating nurse + scrub nurse',
+                gcklNode:'countSafety', gcklMapId:'intraopAdditionalCount',
+                gcklItems:['GCKL-27'],
+                linkedObjects:['count-board','circulating-nurse','instrument-tray','mayo-stand'],
+                requiredEvidence:['count_additional'],
+                evidenceRule:'Additional-material count update evidence completes the task.',
+                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_final_count',
+                label:'Confirm final count before closure',
+                critical:true, score:0, guideline:'aorn', phase:'intraop',
+                role:'scrub', responsibleRole:'Scrub nurse + circulating nurse + surgeon',
+                gcklNode:'countSafety', gcklMapId:'intraopFinalCount',
+                gcklItems:['GCKL-27'],
+                linkedObjects:['count-board','closure-stage','scrub-nurse','circulating-nurse'],
+                requiredEvidence:['count_final'],
+                evidenceRule:'Final count evidence is required before closure/postop advancement.',
+                phaseAdvancementImpact:'hardStop', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_specimen_safety',
+                label:'Verify specimen labelling and handoff',
+                critical:false, score:0, guideline:'aorn', phase:'intraop',
+                role:'circulating_nurse', responsibleRole:'Circulating nurse + scrub nurse',
+                gcklNode:'specimenAndEquipmentIssue', gcklMapId:'intraopSpecimenSafety',
+                gcklItems:['GCKL-28'],
+                linkedObjects:['specimen-container','specimen-table','label','circulating-nurse'],
+                requiredEvidence:['specimen_labeled'],
+                evidenceRule:'Specimen label/handoff evidence completes the task.',
+                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_equipment_fire_safety',
+                label:'Confirm electrosurgery/suction/fire-safety readiness',
+                critical:false, score:0, guideline:'aorn', phase:'intraop',
+                role:'circulating_nurse', responsibleRole:'Circulating nurse + surgeon + anaesthesia',
+                gcklNode:'equipmentAndFireSafety', gcklMapId:'intraopEquipmentFireSafety',
+                gcklItems:['GCKL-21','GCKL-23'],
+                linkedObjects:['esu-unit','esu-pad','suction-smoke','anesthesia-machine','antiseptic-bottle'],
+                requiredEvidence:['esu_pad_position','antiseptic_dry','fire_triangle_assessed'],
+                evidenceRule:'ESU, antiseptic dryness, and fire-triangle evidence complete the task.',
+                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_cabg_cpb_safety',
+                label:'Confirm CABG/CPB readiness for CABG case',
+                critical:false, score:0, guideline:'cardiac', phase:'intraop',
+                role:'team', responsibleRole:'Surgeon + anaesthesia + perfusionist + circulating nurse',
+                gcklNode:'cabgCpbSafety', gcklMapId:'intraopCABGCPBSafety',
+                gcklItems:['GCKL-21','GCKL-24'],
+                linkedObjects:['cpb-machine','perfusionist','perfusion-console','surgical-field'],
+                requiredEvidence:['cpb_machine_ready','perfusion_team_ready','heparin_act_plan_shared'],
+                evidenceRule:'CABG cases require CPB machine, perfusion team, and heparin/ACT plan evidence.',
+                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+            },
+            {
+                id:'intraop_communication_handoff',
+                label:'Confirm closed-loop team communication',
+                critical:false, score:0, guideline:'who_ssc', phase:'intraop',
+                role:'team', responsibleRole:'Full OR team',
+                gcklNode:'teamCommunication', gcklMapId:'intraopCommunicationHandoff',
+                gcklItems:['GCKL-17','GCKL-29'],
+                linkedObjects:['or-team-figures','time-out','circulating-nurse','surgeon'],
+                requiredEvidence:['roles_confirmed','closed_loop_confirmed'],
+                evidenceRule:'Role clarity and closed-loop communication evidence complete the task.',
+                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+            }
         ];
         const insertAfterHints = ['t_signout', 'ti_signout_full', 'ti_count', 'oti2_count', 'lti_count'];
         Object.keys(CASES).forEach(function(caseId){
@@ -27928,6 +28068,13 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
             phases.forEach(function(phase){
                 if (!phase || !Array.isArray(phase.tasks)) return;
                 tasksToAdd.forEach(function(t){
+                    if (t.id === 'intraop_cabg_cpb_safety') {
+                        const caseText = [
+                            c.id, c.specialty, c.specialtyLabel, c.surgery, c.shortSurgery,
+                            ...(Array.isArray(c.riskTags) ? c.riskTags : [])
+                        ].filter(Boolean).join(' ').toLowerCase();
+                        if (!/(cabg|koroner|coronary|bypass|greft|graft)/i.test(caseText)) return;
+                    }
                     if (phase.tasks.some(function(x){ return x && x.id === t.id; })) return;
                     let idx = -1;
                     for (let i = phase.tasks.length - 1; i >= 0; i--) {
@@ -27940,6 +28087,25 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 });
             });
         });
+        window.NK_INTRAOP_GCKL_TASKS = tasksToAdd.map(function(t){ return Object.assign({}, t); });
+        if (typeof TASK_RULE_ENGINE !== 'undefined') {
+            TASK_RULE_ENGINE.tasks = TASK_RULE_ENGINE.tasks || {};
+            tasksToAdd.forEach(function(t){
+                TASK_RULE_ENGINE.tasks[t.id] = Object.assign({}, TASK_RULE_ENGINE.tasks[t.id] || {}, {
+                    phase:'intraop',
+                    freeComplete:true,
+                    requiresPatientTalk:false,
+                    requiresTeamTalk:false,
+                    blocksPhaseAdvance:t.phaseAdvancementImpact === 'hardStop',
+                    gcklNode:t.gcklNode,
+                    gcklMapId:t.gcklMapId,
+                    requiredEvidence:t.requiredEvidence || [],
+                    linkedObjects:t.linkedObjects || [],
+                    role:t.role || t.responsibleRole || 'team',
+                    guidelineTag:t.guideline || 'who_ssc'
+                });
+            });
+        }
         console.info('[NK v9.63] Intraop GCKL tasks patched into CASES.');
     } catch (e) {
         console.warn('[NK v9.63] Intraop GCKL task patch failed', e);
