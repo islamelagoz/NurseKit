@@ -21557,6 +21557,9 @@ function buildPostop() {
         function showObjPopup(obj, x, y) { 
             App.__currentObjPopupObj = obj || null;
             const p = $('#obj-popup');
+            try {
+                if (typeof window.cleanupIntraopPopupHost === 'function') window.cleanupIntraopPopupHost(p, false);
+            } catch (e) {}
             const task = obj.opts?.taskId ? (App.currentPatient[App.currentRoom].tasks || []).find(t => t.id === obj.opts.taskId) : null;
             const cls = taskStatusClass(task);
             const status = taskStatusLabel(task);

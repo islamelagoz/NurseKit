@@ -93,9 +93,9 @@
 
   // ----- CSS (preop dilinde) -----
   var CSS = '\
-#obj-popup.intraop-node-host{width:min(520px,calc(100vw - 30px))!important;max-width:calc(100vw - 30px)!important;overflow:hidden!important}\
+#obj-popup.intraop-node-host{width:min(390px,calc(100vw - 32px))!important;max-width:calc(100vw - 32px)!important;overflow:hidden!important}\
 .intraop-node-popup,.intraop-node-popup *{box-sizing:border-box;max-width:100%}\
-.intraop-node-popup{font-family:inherit;color:#cfe7ee;background:linear-gradient(180deg,#0a1218 0%,#0d1820 100%);border:1px solid #1b3949;border-radius:10px;padding:0;width:100%;min-width:0;max-height:78vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.55);overflow:hidden;font-size:13px;line-height:1.42}\
+.intraop-node-popup{font-family:inherit;color:#cfe7ee;background:linear-gradient(180deg,#0a1218 0%,#0d1820 100%);border:1px solid #1b3949;border-radius:10px;padding:0;width:100%;min-width:0;max-height:min(68vh,560px);display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.55);overflow:hidden;font-size:12px;line-height:1.38}\
 .intraop-node-popup.hardstop{border-color:#7a2330;box-shadow:0 0 0 1px #7a2330 inset,0 8px 32px rgba(0,0,0,.55)}\
 .intraop-node-popup.breach{border-color:#c0392b;box-shadow:0 0 0 2px #c0392b inset}\
 .intraop-node-header{padding:12px 14px 10px;border-bottom:1px solid #18313e;background:linear-gradient(180deg,#102230 0%,#0b1822 100%)}\
@@ -257,10 +257,14 @@
     var def = nd.def, st = nd.state;
     var host = document.getElementById('obj-popup');
     if (!host) return false;
-    host.classList.remove('ipv2-host');
+    if (typeof window.cleanupIntraopPopupHost === 'function') {
+      window.cleanupIntraopPopupHost(host, true);
+    } else {
+      host.classList.remove('ipv2-host');
+    }
     host.classList.add('intraop-node-host');
-    host.style.width = 'min(520px, calc(100vw - 30px))';
-    host.style.maxWidth = 'calc(100vw - 30px)';
+    host.style.width = 'min(390px, calc(100vw - 32px))';
+    host.style.maxWidth = 'calc(100vw - 32px)';
     host.style.overflow = 'hidden';
 
     var status = st.status || 'pending';
@@ -350,31 +354,6 @@
     html += '<button class="intraop-node-action-btn hint" data-hint="1">✨  Hastaya özel klinik ipucu al</button>';
     html += '</div></div>';
 
-    // MCQ inline (cevaplanmışsa otomatik açık, cevaplanmamışsa kart içinde açılabilir)
-    if (hasMcq) {
-      var answered = mcqAnswered;
-      var correctIdx = (typeof def.correctOption === 'number') ? def.correctOption : (def.correctAnswer != null ? def.correctAnswer : -1);
-      html += '<div class="intraop-node-section"><div class="intraop-node-section-title">Mikro Karar Senaryosu</div>';
-      html += '<div class="intraop-node-mcq">';
-      html += '<div class="intraop-node-mcq-q">' + escapeHtml(def.rationaleQuestion) + '</div>';
-      for (var k = 0; k < def.options.length; k++) {
-        var opt = def.options[k];
-        var optText = (typeof opt === 'string') ? opt : (opt.text || '');
-        var cls = '';
-        if (answered) {
-          if (k === correctIdx) cls = ' correct';
-          else if (k === st.rationaleAnswer) cls = ' wrong';
-        }
-        html += '<button class="intraop-node-mcq-opt' + cls + '" data-mcq="' + k + '"' + (answered ? ' disabled' : '') + '>' + escapeHtml(optText) + '</button>';
-      }
-      if (answered) {
-        var ok = (st.rationaleAnswer === correctIdx);
-        var fb = ok ? (def.feedbackCorrect || 'Doğru — güvenli klinik karar.') : (def.feedbackWrong || def.feedbackText || 'Yanlış karar; güvenli olmayan klinik seçim.');
-        html += '<div class="intraop-node-mcq-feedback ' + (ok ? 'correct' : 'wrong') + '">' + escapeHtml(fb) + '</div>';
-      }
-      html += '</div></div>';
-    }
-
     // stop bonus button (kritik node, henüz cevaplanmamış)
     if (hardStop && !st.stopAwarded && status !== 'complete') {
       html += '<button class="intraop-node-stop-btn" data-stop="1">⛔ Güvenli olmadığı için SÜRECİ DURDURUYORUM (stop bonus)</button>';
@@ -400,17 +379,31 @@
     host.style.display = 'block';
 
     // konum
-    if (typeof x === 'number' && typeof y === 'number') {
-      var w = 420, h = 480;
-      var px = Math.min(Math.max(10, x + 14), window.innerWidth - w - 10);
-      var py = Math.min(Math.max(10, y + 14), window.innerHeight - h - 10);
-      host.style.left = px + 'px';
-      host.style.top = py + 'px';
+    if (typeof window.positionPopupNearPoint === 'function') {
+      window.positionPopupNearPoint(host, x, y, 390);
+    } else if (typeof x === 'number' && typeof y === 'number') {
+      var shell = document.getElementById('scene-shell');
+      var sh = shell ? shell.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+      var w = 390, h = 480, pad = 12, gap = 14;
+      var localX = x - sh.left;
+      var localY = y - sh.top;
+      var openRight = true;
+      var left = localX + gap;
+      if (left + w > sh.width - pad) {
+        left = localX - w - gap;
+        openRight = false;
+      }
+      left = Math.max(pad, Math.min(sh.width - w - pad, left));
+      var top = Math.max(pad, Math.min(sh.height - h - pad, localY - 12));
+      host.style.left = left + 'px';
+      host.style.top = top + 'px';
+      host.classList.remove('side-right', 'side-left');
+      host.classList.add(openRight ? 'side-right' : 'side-left');
     }
 
     // event delegation
     host.onclick = function (e) {
-      var t = e.target.closest('[data-ev],[data-mcq],[data-stop]');
+      var t = e.target.closest('[data-ev],[data-stop],[data-mcq-toggle],[data-hint]');
       if (!t) return;
       var net = getNet();
       if (!net) return;
@@ -421,12 +414,21 @@
           net.markEvidence(nodeId, t.dataset.ev);
         }
         renderIntraopGcklNodePopup(nodeId, obj, null, null);
-      } else if (t.dataset.mcq != null && net.answerRationale) {
-        net.answerRationale(nodeId, +t.dataset.mcq);
-        renderIntraopGcklNodePopup(nodeId, obj, null, null);
       } else if (t.dataset.mcqToggle) {
-        var box = host.querySelector('.intraop-node-mcq');
-        if (box) box.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+        if (typeof window.openIntraopMcqPanel === 'function') {
+          window.openIntraopMcqPanel({
+            title: def.label || nodeId,
+            microScenario: {
+              title: 'Mikro senaryo + karar sorusu',
+              scenarioText: def.rationaleScenario || def.gcklItem || def.label || '',
+              questionText: def.rationaleQuestion,
+              options: def.options || [],
+              correctIndex: (typeof def.correctOption === 'number') ? def.correctOption : (def.correctAnswer != null ? def.correctAnswer : -1),
+              correctFeedback: def.feedbackCorrect || 'Doğru karar.',
+              wrongFeedback: def.feedbackWrong || def.feedbackText || 'Yanlış karar; güvenli olmayan klinik seçim.'
+            }
+          }, nodeId);
+        }
       } else if (t.dataset.hint) {
         var hint = (def.clinicalHint || def.feedbackText || 'Bu adım için klinik ipucu: ' + (def.gcklItem || def.label || ''));
         if (window.showClinicalHint) window.showClinicalHint(nodeId, hint);

@@ -2139,21 +2139,21 @@
     s.id = 'intra-popups-v2-css';
     s.textContent = [
       /* ── Kart konteyner ── */
-      '#obj-popup.ipv2-host{width:min(520px,calc(100vw - 30px))!important;max-width:calc(100vw - 30px)!important;overflow:hidden!important}',
+      '#obj-popup.ipv2-host{width:min(390px,calc(100vw - 32px))!important;max-width:calc(100vw - 32px)!important;overflow:hidden!important}',
       '.ipv2,.ipv2 *{box-sizing:border-box;max-width:100%}',
-      '.ipv2{font-family:inherit;color:var(--ink,#e8eef2);background:linear-gradient(180deg,rgba(10,24,38,.98),rgba(12,27,42,.98));border:1px solid rgba(92,196,214,.42);border-radius:14px;width:100%;min-width:0;max-height:min(72dvh,640px);display:flex;flex-direction:column;box-shadow:0 18px 50px rgba(0,0,0,.45);overflow:hidden;font-size:12px;line-height:1.4}',
+      '.ipv2{font-family:inherit;color:var(--ink,#e8eef2);background:linear-gradient(180deg,rgba(10,24,38,.98),rgba(12,27,42,.98));border:1px solid rgba(92,196,214,.42);border-radius:12px;width:100%;min-width:0;max-height:min(68vh,560px);display:flex;flex-direction:column;box-shadow:0 14px 38px rgba(0,0,0,.43);overflow:hidden;font-size:11.5px;line-height:1.36}',
       '.ipv2.hs-true{border-color:rgba(217,99,113,.55);box-shadow:0 0 0 1px rgba(217,99,113,.28) inset,0 18px 50px rgba(0,0,0,.45)}',
       '.ipv2.hs-cond{border-color:rgba(224,165,88,.50)}',
       '.ipv2.breach{border-color:rgba(217,99,113,.80);box-shadow:0 0 0 2px rgba(217,99,113,.30) inset,0 18px 50px rgba(0,0,0,.45)}',
 
       /* ── Header (Başlık + Alt başlık + Açıklama + Chip satırı) ── */
-      '.ipv2-h{padding:12px 14px 9px;border-bottom:1px solid rgba(92,196,214,.16);background:linear-gradient(180deg,rgba(16,40,58,.50),rgba(11,24,38,.10));position:relative}',
+      '.ipv2-h{padding:10px 12px 8px;border-bottom:1px solid rgba(92,196,214,.16);background:linear-gradient(180deg,rgba(16,40,58,.50),rgba(11,24,38,.10));position:relative}',
       '.ipv2-cls{position:absolute;top:8px;right:11px;cursor:pointer;color:var(--ink-mute,#7aabb8);font-size:18px;font-weight:600;line-height:1;user-select:none}',
       '.ipv2-cls:hover{color:var(--ink,#e8eef2)}',
-      '.ipv2-t{font-size:13.5px;line-height:1.2;letter-spacing:.035em;color:var(--teal,#5cc4d6);font-weight:820;padding-right:22px;text-transform:uppercase;margin:0}',
+      '.ipv2-t{font-size:12.8px;line-height:1.2;letter-spacing:.035em;color:var(--teal,#5cc4d6);font-weight:820;padding-right:22px;text-transform:uppercase;margin:0}',
       '.ipv2-st{margin-top:3px;color:var(--ink-mute,#86b1be);font-size:11px;line-height:1.34;font-weight:600}',
-      '.ipv2-d{margin-top:6px;color:var(--ink,#d8e6ec);font-size:11.5px;line-height:1.42;font-weight:500;overflow-wrap:anywhere}',
-      '.ipv2-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;align-items:center}',
+      '.ipv2-d{margin-top:5px;color:var(--ink,#d8e6ec);font-size:11.1px;line-height:1.38;font-weight:500;overflow-wrap:anywhere}',
+      '.ipv2-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px;align-items:center}',
       '.ipv2-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:rgba(92,196,214,.10);border:1px solid rgba(92,196,214,.24);color:var(--teal,#5cc4d6);font-size:9.8px;font-weight:720;letter-spacing:.02em;line-height:1;white-space:nowrap}',
       '.ipv2-chip.gckl{background:rgba(63,196,128,.10);border-color:rgba(63,196,128,.28);color:var(--green,#7fe2a3)}',
       '.ipv2-chip.hs{background:rgba(217,99,113,.13);border-color:rgba(217,99,113,.36);color:#f0a0aa}',
@@ -2163,30 +2163,35 @@
       '.ipv2-chip.score{background:rgba(63,196,128,.10);border-color:rgba(63,196,128,.30);color:var(--green,#7fe2a3)}',
 
       /* ── Body & scroll ── */
-      '.ipv2-b{padding:11px 14px 13px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;flex:1;scrollbar-width:thin;scrollbar-color:rgba(92,196,214,.50) rgba(255,255,255,.05)}',
+      '.ipv2-b{padding:9px 12px 11px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;flex:1;scrollbar-width:thin;scrollbar-color:rgba(92,196,214,.50) rgba(255,255,255,.05)}',
       '.ipv2-b::-webkit-scrollbar{width:8px}',
       '.ipv2-b::-webkit-scrollbar-track{background:rgba(255,255,255,.045);border-radius:999px}',
       '.ipv2-b::-webkit-scrollbar-thumb{background:rgba(92,196,214,.46);border-radius:999px;border:2px solid rgba(10,24,38,.95)}',
       '.ipv2-b::-webkit-scrollbar-thumb:hover{background:rgba(92,196,214,.70)}',
 
       /* ── Progress bar ── */
-      '.ipv2-prog{display:flex;align-items:center;gap:8px;margin:0 0 11px}',
+      '.ipv2-prog{display:flex;align-items:center;gap:8px;margin:0 0 8px}',
       '.ipv2-prog-bar{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden}',
       '.ipv2-prog-fill{height:100%;background:linear-gradient(90deg,#1a8f73,var(--green,#52d4af));transition:width .25s;border-radius:999px}',
       '.ipv2-prog-txt{font-size:10px;color:var(--ink-mute,#7aabb8);font-weight:720;min-width:48px;text-align:right;white-space:nowrap}',
 
       /* ── Bölüm başlığı + section konteynerı ── */
-      '.ipv2-sec{margin:10px 0 0}',
+      '.ipv2-sec{margin:8px 0 0}',
       '.ipv2-sec-t{font-size:9.8px;text-transform:uppercase;letter-spacing:.075em;color:var(--ink-mute,#7aabb8);font-weight:820;margin-bottom:5px}',
+      '.ipv2-secondary{margin-top:8px;border:1px solid rgba(92,196,214,.14);border-radius:10px;background:rgba(255,255,255,.018);overflow:hidden}',
+      '.ipv2-secondary summary{cursor:pointer;list-style:none;padding:7px 9px;font-size:9.8px;text-transform:uppercase;letter-spacing:.075em;color:var(--teal,#86dac6);font-weight:820}',
+      '.ipv2-secondary summary::-webkit-details-marker{display:none}',
+      '.ipv2-secondary[open] summary{border-bottom:1px solid rgba(92,196,214,.14)}',
+      '.ipv2-secondary-body{padding:8px 9px}',
 
       /* ── Rol (teal kutu) ── */
-      '.ipv2-role{background:rgba(92,196,214,.07);border:1px solid rgba(92,196,214,.20);border-radius:11px;padding:8px 10px;font-size:11.5px;color:var(--ink,#cfe7ee);line-height:1.44;overflow-wrap:anywhere}',
+      '.ipv2-role{background:rgba(92,196,214,.07);border:1px solid rgba(92,196,214,.20);border-radius:10px;padding:7px 9px;font-size:11.2px;color:var(--ink,#cfe7ee);line-height:1.38;overflow-wrap:anywhere}',
 
       /* ── Linked task & GCKL maddesi (dashed teal) ── */
-      '.ipv2-link{background:rgba(92,196,214,.05);border:1px dashed rgba(92,196,214,.28);padding:7px 10px;border-radius:11px;font-size:11px;color:var(--ink,#9ed1de);line-height:1.42;overflow-wrap:anywhere}',
+      '.ipv2-link{background:rgba(92,196,214,.05);border:1px dashed rgba(92,196,214,.28);padding:7px 9px;border-radius:10px;font-size:10.8px;color:var(--ink,#9ed1de);line-height:1.38;overflow-wrap:anywhere}',
 
       /* ── KRİTİK HATA bölümü (kırmızı sol-bordürlü kutu) ── */
-      '.ipv2-warn{padding:8px 10px;border-radius:11px;font-size:11.2px;line-height:1.44;border-left:3px solid var(--amber,#e0a558);background:rgba(224,165,88,.08);color:var(--ink,#e0dca0);margin-bottom:5px;overflow-wrap:anywhere}',
+      '.ipv2-warn{padding:7px 9px;border-radius:10px;font-size:10.9px;line-height:1.38;border-left:3px solid var(--amber,#e0a558);background:rgba(224,165,88,.08);color:var(--ink,#e0dca0);margin-bottom:5px;overflow-wrap:anywhere}',
       '.ipv2-warn.hs{border-left-color:var(--rose,#d96371);background:rgba(217,99,113,.10);color:#f0b5b0}',
       '.ipv2-warn b{display:block;margin-bottom:3px;font-size:9.8px;letter-spacing:.075em;text-transform:uppercase;color:inherit}',
       '.ipv2-fail{padding:7px 10px;border-radius:11px;font-size:11px;background:rgba(217,99,113,.06);border-left:3px solid rgba(217,99,113,.55);color:#e0a8b3;margin-top:4px;line-height:1.4;overflow-wrap:anywhere}',
@@ -2203,8 +2208,8 @@
       '.ipv2-evid div{margin-top:2px}',
 
       /* ── Butonlar (NK136 buton dili) ── */
-      '.ipv2-actions{display:grid;grid-template-columns:1fr;gap:6px;margin-top:6px}',
-      '.ipv2-btn{display:block;width:100%;padding:8px 10px;background:rgba(92,196,214,.11);border:1px solid rgba(92,196,214,.35);border-radius:11px;color:var(--teal,#5cc4d6);cursor:pointer;font-size:11.5px;font-weight:760;text-align:left;line-height:1.28;transition:background .15s ease,border-color .15s ease,transform .15s ease;font-family:inherit;letter-spacing:.01em;white-space:normal;overflow-wrap:break-word;word-wrap:break-word;hyphens:auto}',
+      '.ipv2-actions{display:grid;grid-template-columns:1fr;gap:5px;margin-top:5px}',
+      '.ipv2-btn{display:block;width:100%;padding:7px 9px;background:rgba(92,196,214,.11);border:1px solid rgba(92,196,214,.35);border-radius:10px;color:var(--teal,#5cc4d6);cursor:pointer;font-size:11.2px;font-weight:760;text-align:left;line-height:1.25;transition:background .15s ease,border-color .15s ease,transform .15s ease;font-family:inherit;letter-spacing:.01em;white-space:normal;overflow-wrap:break-word;word-wrap:break-word;hyphens:auto}',
       '.ipv2-btn:hover:not([disabled]){background:rgba(92,196,214,.16);transform:translateY(-1px)}',
       '.ipv2-btn[disabled]{cursor:not-allowed;opacity:.50}',
       '.ipv2-btn.primary{border-color:rgba(217,99,113,.55);background:rgba(217,99,113,.15);color:#ffd7df}',
@@ -2219,6 +2224,11 @@
       '.ipv2-btn.stop:hover:not([disabled]){background:rgba(217,99,113,.28)}',
 
       /* ── Mikro senaryo kutusu (ayrı teal kutu) ── */
+      '.ipv2-mcq-modal{position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(2,8,13,.42)}',
+      '.ipv2-mcq-panel{width:min(420px,calc(100vw - 32px));max-height:min(78vh,620px);overflow:auto;background:linear-gradient(180deg,rgba(10,24,38,.99),rgba(12,27,42,.99));border:1px solid rgba(92,196,214,.38);border-radius:12px;box-shadow:0 22px 60px rgba(0,0,0,.52);padding:12px;color:var(--ink,#e8eef2)}',
+      '.ipv2-mcq-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}',
+      '.ipv2-mcq-panel-title{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--teal,#5cc4d6);font-weight:820;line-height:1.22}',
+      '.ipv2-mcq-close{border:0;background:transparent;color:var(--ink-mute,#7aabb8);font-size:20px;line-height:1;cursor:pointer;padding:0 2px}',
       '.ipv2-mcq{background:rgba(92,196,214,.05);border:1px solid rgba(92,196,214,.22);border-radius:12px;padding:9px 10px;margin-top:5px}',
       '.ipv2-mcq-q{font-size:11.5px;color:var(--ink,#e7f6fa);font-weight:680;margin-bottom:7px;line-height:1.4}',
       '.ipv2-mcq-q b{display:inline-block;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--teal,#5cc4d6);font-weight:820;margin-right:4px;vertical-align:baseline}',
@@ -2234,7 +2244,7 @@
       '.ipv2-ai{font-size:10.8px;margin-top:7px;color:#cce29a;padding:7px 10px;background:rgba(204,226,154,.07);border-left:3px solid rgba(204,226,154,.35);border-radius:11px;line-height:1.42}',
 
       /* ── GCKL HARİTALAMA — kompakt tablo gibi grid ── */
-      '.ipv2-map{font-size:10.4px;color:var(--ink-mute,#7aabb8);margin-top:10px;padding:10px 11px;background:rgba(255,255,255,.025);border:1px solid rgba(92,196,214,.18);border-radius:12px;line-height:1.5;display:block}',
+      '.ipv2-map{font-size:10.2px;color:var(--ink-mute,#7aabb8);margin-top:0;padding:0;background:transparent;border:0;border-radius:0;line-height:1.45;display:block}',
       '.ipv2-map-t{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.075em;color:var(--teal,#86dac6);font-weight:820;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid rgba(92,196,214,.16)}',
       '.ipv2-map-grid{display:grid;grid-template-columns:minmax(92px,auto) minmax(0,1fr);gap:3px 9px}',
       '.ipv2-map-grid b{color:var(--ink-mute,#7aabb8);font-size:9.6px;text-transform:uppercase;letter-spacing:.045em;font-weight:720;align-self:start}',
@@ -2303,6 +2313,162 @@
       if (sources[i] && sources[i].ev === ev && sources[i].label) return sources[i].label;
     }
     return String(ev || '').replace(/_/g, ' ');
+  }
+
+  function cleanupIntraopPopupHost(host, keepPosition) {
+    if (!host) return;
+    host.classList.remove('ipv2-host', 'intraop-node-host', 'side-right', 'side-left');
+    host.removeAttribute('data-intra-popups-v2');
+    host.style.width = '';
+    host.style.maxWidth = '';
+    host.style.overflow = '';
+    if (!keepPosition) {
+      host.style.left = '';
+      host.style.top = '';
+      try { delete host.__intraPopupAnchor; } catch (e) { host.__intraPopupAnchor = null; }
+    }
+  }
+
+  function closeIntraProtocolCard(host) {
+    cleanupIntraopPopupHost(host, false);
+    if (host) {
+      host.classList.remove('visible');
+      host.style.display = 'none';
+    }
+  }
+
+  function normalizePopupClientPoint(shellRect, x, y) {
+    var anchor = (window.__intraV2PopupAnchor && typeof window.__intraV2PopupAnchor.x === 'number')
+      ? window.__intraV2PopupAnchor
+      : null;
+    var px = (typeof x === 'number') ? x : (anchor ? anchor.x : shellRect.left + shellRect.width / 2);
+    var py = (typeof y === 'number') ? y : (anchor ? anchor.y : shellRect.top + Math.min(180, shellRect.height / 2));
+
+    // Bazı eski çağrılar x/y değerini zaten scene-shell lokal koordinatı olarak verebiliyor.
+    if ((px >= 0 && px <= shellRect.width && py >= 0 && py <= shellRect.height) &&
+        (px < shellRect.left || px > shellRect.right || py < shellRect.top || py > shellRect.bottom)) {
+      px = shellRect.left + px;
+      py = shellRect.top + py;
+    }
+    return { x: px, y: py };
+  }
+
+  function positionPopupNearPoint(host, x, y, preferredWidth) {
+    if (!host) return;
+    var shell = document.getElementById('scene-shell');
+    if (!shell) return;
+    var sh = shell.getBoundingClientRect();
+    host.classList.remove('side-right', 'side-left');
+
+    var width = Math.min(preferredWidth || 390, Math.max(260, sh.width - 24));
+    if (window.innerWidth <= 920) {
+      host.style.left = '';
+      host.style.top = '';
+      window.__intraV2PopupAnchor = normalizePopupClientPoint(sh, x, y);
+      return;
+    }
+
+    var pt = normalizePopupClientPoint(sh, x, y);
+    var localX = pt.x - sh.left;
+    var localY = pt.y - sh.top;
+    var pad = 12;
+    var gap = 14;
+    var openRight = true;
+    var left = localX + gap;
+    var top = localY - 12;
+
+    if (left + width > sh.width - pad) {
+      left = localX - width - gap;
+      openRight = false;
+    }
+    if (left < pad) {
+      left = Math.max(pad, Math.min(sh.width - width - pad, localX + gap));
+      openRight = left >= localX;
+    }
+    left = Math.max(pad, Math.min(sh.width - width - pad, left));
+
+    var measuredH = host.scrollHeight || host.offsetHeight || 360;
+    var estH = Math.min(Math.max(220, measuredH), Math.max(220, sh.height - pad * 2));
+    if (top + estH > sh.height - pad) top = sh.height - estH - pad;
+    if (top < pad) top = pad;
+
+    host.style.left = Math.round(left) + 'px';
+    host.style.top = Math.round(top) + 'px';
+    host.classList.add(openRight ? 'side-right' : 'side-left');
+    window.__intraV2PopupAnchor = { x: pt.x, y: pt.y };
+    host.__intraPopupAnchor = window.__intraV2PopupAnchor;
+  }
+
+  function openIntraopMcqPanel(card, nodeId) {
+    ensureCss();
+    var sc = card && card.microScenario;
+    if (!sc) return;
+    var old = document.getElementById('intraop-mcq-modal');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+
+    var snap = getNodeSnap(nodeId);
+    var answered = !!(snap && typeof snap.rationaleAnswer === 'number');
+    var correctIndex = sc.correctIndex;
+    var html = '';
+    html += '<div class="ipv2-mcq-panel" role="dialog" aria-modal="true">';
+    html += '<div class="ipv2-mcq-panel-head">';
+    html += '<div class="ipv2-mcq-panel-title">' + esc(sc.title || 'Mikro senaryo + karar sorusu') + '</div>';
+    html += '<button class="ipv2-mcq-close" type="button" data-close-mcq="1">×</button>';
+    html += '</div>';
+    html += '<div class="ipv2-mcq">';
+    html += '<div class="ipv2-mcq-q"><b>Senaryo:</b> ' + esc(sc.scenarioText || '') + '<br><b>Soru:</b> ' + esc(sc.questionText || '') + '</div>';
+    (sc.options || []).forEach(function (opt, idx) {
+      var cls = '';
+      if (answered) {
+        if (idx === correctIndex) cls = ' correct';
+        else if (idx === snap.rationaleAnswer) cls = ' wrong';
+      }
+      html += '<button class="ipv2-mcq-opt' + cls + '" data-mcq-option="' + idx + '"' + (answered ? ' disabled' : '') + '>' + esc(opt) + '</button>';
+    });
+    if (answered) {
+      var ok = snap.rationaleAnswer === correctIndex;
+      html += '<div class="ipv2-mcq-fb ' + (ok ? 'correct' : 'wrong') + '">' + esc(ok ? sc.correctFeedback : sc.wrongFeedback) + '</div>';
+    } else {
+      html += '<div class="ipv2-mcq-fb" data-mcq-feedback style="display:none"></div>';
+    }
+    html += '</div></div>';
+
+    var modal = document.createElement('div');
+    modal.id = 'intraop-mcq-modal';
+    modal.className = 'ipv2-mcq-modal';
+    modal.innerHTML = html;
+    modal.onclick = function (ev) {
+      var close = ev.target && ev.target.closest && ev.target.closest('[data-close-mcq]');
+      if (close || ev.target === modal) {
+        modal.remove();
+        return;
+      }
+      var optBtn = ev.target && ev.target.closest && ev.target.closest('[data-mcq-option]');
+      if (!optBtn || optBtn.disabled) return;
+      var idx = +optBtn.dataset.mcqOption;
+      var result = null;
+      if (typeof window.intraGcklAnswerRationale === 'function') {
+        result = window.intraGcklAnswerRationale(nodeId, idx);
+      } else {
+        var net = getNet();
+        if (net && typeof net.answerRationale === 'function') result = net.answerRationale(nodeId, idx);
+      }
+      refreshIntraopGcklViews('mcq:option' + idx);
+      var ok = result && typeof result.ok === 'boolean' ? result.ok : idx === correctIndex;
+      modal.querySelectorAll('[data-mcq-option]').forEach(function (b) {
+        b.disabled = true;
+        var bi = +b.dataset.mcqOption;
+        if (bi === correctIndex) b.classList.add('correct');
+        else if (bi === idx && !ok) b.classList.add('wrong');
+      });
+      var fb = modal.querySelector('[data-mcq-feedback]');
+      if (fb) {
+        fb.style.display = 'block';
+        fb.className = 'ipv2-mcq-fb ' + (ok ? 'correct' : 'wrong');
+        fb.textContent = ok ? (sc.correctFeedback || 'Doğru karar.') : (sc.wrongFeedback || 'Yanlış karar; güvenlik bariyeri ihlali oluştu.');
+      }
+    };
+    document.body.appendChild(modal);
   }
 
   // =================================================================
@@ -2454,6 +2620,20 @@
       h += '</div>';
     }
 
+    if (requiredEvs.length) {
+      h += '<div class="ipv2-sec"><div class="ipv2-sec-t">Evidence Checklist</div>';
+      h += '<div class="ipv2-actions">';
+      requiredEvs.forEach(function (evKey) {
+        var done = !!evState[evKey];
+        var cls = 'ipv2-btn' + (done ? ' done' : '');
+        var disabled = (!prereq.ok || done);
+        var label = evidenceLabelFor(card, evKey);
+        h += '<button class="' + cls + '" data-ev="' + esc(evKey) + '"' + (disabled ? ' disabled' : '') + '>' +
+          esc(done ? ('Doğrulandı · ' + label) : label) + '</button>';
+      });
+      h += '</div></div>';
+    }
+
     // Rol
     h += '<div class="ipv2-sec"><div class="ipv2-sec-t">Rol / Görev Sorumluluğu</div>';
     h += '<div class="ipv2-role">' + esc(card.role) + '</div></div>';
@@ -2480,56 +2660,14 @@
     if (card.successCriteria) h += '<div class="ipv2-succ"><b>Başarı kriteri:</b> ' + esc(card.successCriteria) + '</div>';
     h += '</div>';
 
-    // Evidence butonları
-    if (card.buttons && card.buttons.length) {
-      h += '<div class="ipv2-sec"><div class="ipv2-sec-t">Doğrulama / Sorgulama Adımları</div>';
-      h += '<div class="ipv2-actions">';
-      var firstPrimary = false;
-      card.buttons.forEach(function (b) {
-        var done = !!evState[b.ev];
-        var cls = 'ipv2-btn';
-        if (done) cls += ' done';
-        else if (!firstPrimary) { cls += ' primary'; firstPrimary = true; }
-        var disabled = (!prereq.ok || done);
-        h += '<button class="' + cls + '" data-ev="' + esc(b.ev) + '"' + (disabled ? ' disabled' : '') + '>' + esc(b.label) + '</button>';
-      });
-      h += '</div></div>';
-    }
-
-    // Evidence Checklist — ADIM 8: kart sıralamasında 11. konuma taşındı (klinik nottan sonra)
-    // [TAŞINDI — aşağıda klinik not bloğundan sonra renderlanıyor]
-
     // MCQ + hint butonları
     var hasMcq = !!card.microScenario;
-    var mcqAnswered = hasMcq && (snap && typeof snap.rationaleAnswer === 'number');
     h += '<div class="ipv2-sec"><div class="ipv2-actions">';
-    if (hasMcq && !mcqAnswered) {
+    if (hasMcq) {
       h += '<button class="ipv2-btn mcq" data-mcq-toggle="1">🎭  Mikro senaryo + karar sorusu</button>';
     }
     h += '<button class="ipv2-btn hint" data-hint="1">✨  Hastaya özel klinik ipucu al</button>';
     h += '</div></div>';
-
-    // MCQ inline
-    if (hasMcq) {
-      var sc = card.microScenario;
-      var ci = sc.correctIndex;
-      h += '<div class="ipv2-sec"><div class="ipv2-sec-t">' + esc(sc.title || 'Mikro Karar Senaryosu') + '</div>';
-      h += '<div class="ipv2-mcq">';
-      h += '<div class="ipv2-mcq-q"><b>Senaryo:</b> ' + esc(sc.scenarioText) + '<br><b>Soru:</b> ' + esc(sc.questionText) + '</div>';
-      (sc.options || []).forEach(function (opt, k) {
-        var ocls = '';
-        if (mcqAnswered) {
-          if (k === ci) ocls = ' correct';
-          else if (k === snap.rationaleAnswer) ocls = ' wrong';
-        }
-        h += '<button class="ipv2-mcq-opt' + ocls + '" data-mcq="' + k + '"' + (mcqAnswered ? ' disabled' : '') + '>' + esc(opt) + '</button>';
-      });
-      if (mcqAnswered) {
-        var ok = (snap.rationaleAnswer === ci);
-        h += '<div class="ipv2-mcq-fb ' + (ok ? 'correct' : 'wrong') + '">' + esc(ok ? sc.correctFeedback : sc.wrongFeedback) + '</div>';
-      }
-      h += '</div></div>';
-    }
 
     // Stop bonus butonu (hard-stop kartlar, henüz tamamlanmamış)
     if ((card.hardStop === true || card.hardStop === 'conditional') && snap && !snap.stopAwarded && status !== 'complete') {
@@ -2541,26 +2679,11 @@
 
     // Klinik Not / Kanıt Gerekçesi
     if (card.clinicalEvidence) {
-      h += '<div class="ipv2-evid">';
+      h += '<details class="ipv2-secondary"><summary>Klinik Not / Kanıt Gerekçesi</summary><div class="ipv2-secondary-body"><div class="ipv2-evid">';
       h += '<b>Klinik Not / Kanıt Gerekçesi</b>';
       h += '<div><b>Kaynak:</b> ' + esc(card.clinicalEvidence.source || '—') + '</div>';
       if (card.clinicalEvidence.note) h += '<div style="margin-top:3px">' + esc(card.clinicalEvidence.note) + '</div>';
-      h += '</div>';
-    }
-
-    // Evidence Checklist (ek doğrulama listesi) — ADIM 8: spec madde 11 konumu
-    if (requiredEvs.length) {
-      h += '<div class="ipv2-sec"><div class="ipv2-sec-t">Evidence Checklist</div>';
-      h += '<div class="ipv2-actions">';
-      requiredEvs.forEach(function (evKey) {
-        var done = !!evState[evKey];
-        var cls = 'ipv2-btn' + (done ? ' done' : '');
-        var disabled = (!prereq.ok || done);
-        var label = evidenceLabelFor(card, evKey);
-        h += '<button class="' + cls + '" data-ev="' + esc(evKey) + '"' + (disabled ? ' disabled' : '') + '>' +
-          esc(done ? ('Doğrulandı · ' + label) : label) + '</button>';
-      });
-      h += '</div></div>';
+      h += '</div></div></details>';
     }
 
     // GCKL HARİTALAMA — ADIM 8: kompakt tablo (grid) gösterim
@@ -2571,8 +2694,7 @@
       else if (m.hardStop === 'conditional') { hsLabel = 'Koşullu'; hsClass = 'hs-cond'; }
       else { hsLabel = 'Hayır'; hsClass = 'hs-none'; }
 
-      h += '<div class="ipv2-map">';
-      h += '<span class="ipv2-map-t">GCKL Haritalama</span>';
+      h += '<details class="ipv2-secondary"><summary>GCKL Haritalama</summary><div class="ipv2-secondary-body"><div class="ipv2-map">';
       h += '<div class="ipv2-map-grid">';
       h += '<b>Node</b><span>' + esc(m.node || '—') + '</span>';
       h += '<b>Task tag</b><span>' + esc(m.taskTag || '—') + '</span>';
@@ -2580,7 +2702,7 @@
       h += '<b>GCKL maddesi</b><span>' + esc(m.gcklItem || '—') + '</span>';
       h += '<b>Puan ağırlığı</b><span>' + (m.scoreWeight || 0) + '</span>';
       h += '<b>Hard-stop</b><span class="' + hsClass + '">' + esc(hsLabel) + '</span>';
-      h += '</div></div>';
+      h += '</div></div></div></details>';
     }
 
     h += '</div>'; // body
@@ -2588,21 +2710,14 @@
 
     host.innerHTML = h;
     host.style.display = 'block';
-    host.classList.remove('intraop-node-host');
+    cleanupIntraopPopupHost(host, true);
     host.classList.add('ipv2-host');
-    host.style.width = 'min(520px, calc(100vw - 30px))';
-    host.style.maxWidth = 'calc(100vw - 30px)';
+    host.setAttribute('data-intra-popups-v2', '1');
+    host.style.width = 'min(390px, calc(100vw - 32px))';
+    host.style.maxWidth = 'calc(100vw - 32px)';
     host.style.overflow = 'hidden';
     host.classList.add('visible');
-
-    // Konum
-    if (typeof x === 'number' && typeof y === 'number') {
-      var w = Math.min(520, window.innerWidth - 30), hH = 500;
-      var px = Math.min(Math.max(10, x + 14), window.innerWidth - w - 10);
-      var py = Math.min(Math.max(10, y + 14), window.innerHeight - hH - 10);
-      host.style.left = px + 'px';
-      host.style.top = py + 'px';
-    }
+    positionPopupNearPoint(host, x, y, 390);
 
     // Event delegation
     host.onclick = function (ev) {
@@ -2610,12 +2725,11 @@
       if (!t) return;
 
       if (t.classList && (t.classList.contains('oclose') || t.classList.contains('ipv2-cls'))) {
-        host.classList.remove('visible');
-        host.style.display = 'none';
+        closeIntraProtocolCard(host);
         return;
       }
 
-      var btn = t.closest && t.closest('[data-ev],[data-mcq],[data-stop],[data-mcq-toggle],[data-hint]');
+      var btn = t.closest && t.closest('[data-ev],[data-stop],[data-mcq-toggle],[data-hint]');
       if (!btn) return;
 
       var net = getNet();
@@ -2637,16 +2751,8 @@
         return;
       }
 
-      if (btn.dataset.mcq != null && net.answerRationale) {
-        net.answerRationale(nodeId, +btn.dataset.mcq);
-        refreshIntraopGcklViews('mcq:option' + btn.dataset.mcq);
-        renderIntraProtocolCard(card, clinicalKey, obj, null, null);
-        return;
-      }
-
       if (btn.dataset.mcqToggle) {
-        var box = host.querySelector('.ipv2-mcq');
-        if (box) box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        openIntraopMcqPanel(card, nodeId);
         return;
       }
 
@@ -2688,11 +2794,17 @@
   window.INTRA_POPUPS_ALIAS = KEY_ALIAS;
   window.resolveIntraCard = resolveCard;
   window.renderIntraProtocolCard = renderIntraProtocolCard;
+  window.cleanupIntraopPopupHost = cleanupIntraopPopupHost;
+  window.positionPopupNearPoint = positionPopupNearPoint;
+  window.openIntraopMcqPanel = openIntraopMcqPanel;
   window.validateIntraPopups = validateIntraPopups;
   window.validateIntraopParity = validateIntraopParity;
   window.IntraPopups = window.IntraPopups || {};
   window.IntraPopups.resolveIntraCard = resolveCard;
   window.IntraPopups.renderIntraProtocolCard = renderIntraProtocolCard;
+  window.IntraPopups.cleanupPopupHost = cleanupIntraopPopupHost;
+  window.IntraPopups.positionPopupNearPoint = positionPopupNearPoint;
+  window.IntraPopups.openMcqPanel = openIntraopMcqPanel;
   window.IntraPopups.validateIntraPopups = validateIntraPopups;
   window.IntraPopups.validateIntraopParity = validateIntraopParity;
   window.__INTRA_POPUPS_V2_ACTIVE = true;
@@ -2736,7 +2848,7 @@
       } catch (e) {
         console.warn('[INTRA_POPUPS] inner hook err', e);
       }
-      try { var hc = document.getElementById('obj-popup'); if (hc) hc.removeAttribute('data-intra-popups-v2'); } catch (e) {}
+      try { cleanupIntraopPopupHost(document.getElementById('obj-popup'), false); } catch (e) {}
       return prev.apply(this, arguments);
     };
     window.__INTRA_POPUPS_V2_HOOK = true;
@@ -2775,8 +2887,7 @@
       } catch (e) { console.warn('[INTRA_POPUPS] outer hook err', e); }
       // v2 sahibi değil → zincirin altına bırak (fallback path)
       try {
-        var host2 = document.getElementById('obj-popup');
-        if (host2) host2.removeAttribute('data-intra-popups-v2');
+        cleanupIntraopPopupHost(document.getElementById('obj-popup'), false);
       } catch (e) {}
       return inner.apply(this, arguments);
     };
