@@ -93,12 +93,14 @@
 
   // ----- CSS (preop dilinde) -----
   var CSS = '\
-.intraop-node-popup{font-family:inherit;color:#cfe7ee;background:linear-gradient(180deg,#0a1218 0%,#0d1820 100%);border:1px solid #1b3949;border-radius:10px;padding:0;max-width:420px;min-width:340px;max-height:78vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.55);overflow:hidden;font-size:13px;line-height:1.42}\
+#obj-popup.intraop-node-host{width:min(520px,calc(100vw - 30px))!important;max-width:calc(100vw - 30px)!important;overflow:hidden!important}\
+.intraop-node-popup,.intraop-node-popup *{box-sizing:border-box;max-width:100%}\
+.intraop-node-popup{font-family:inherit;color:#cfe7ee;background:linear-gradient(180deg,#0a1218 0%,#0d1820 100%);border:1px solid #1b3949;border-radius:10px;padding:0;width:100%;min-width:0;max-height:78vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.55);overflow:hidden;font-size:13px;line-height:1.42}\
 .intraop-node-popup.hardstop{border-color:#7a2330;box-shadow:0 0 0 1px #7a2330 inset,0 8px 32px rgba(0,0,0,.55)}\
 .intraop-node-popup.breach{border-color:#c0392b;box-shadow:0 0 0 2px #c0392b inset}\
 .intraop-node-header{padding:12px 14px 10px;border-bottom:1px solid #18313e;background:linear-gradient(180deg,#102230 0%,#0b1822 100%)}\
-.intraop-node-title{font-size:14.5px;font-weight:700;color:#e7f6fa;letter-spacing:.2px}\
-.intraop-node-desc{margin-top:4px;color:#8fb3bf;font-size:11.8px}\
+.intraop-node-title{font-size:14.5px;font-weight:700;color:#e7f6fa;letter-spacing:.2px;overflow-wrap:anywhere}\
+.intraop-node-desc{margin-top:4px;color:#8fb3bf;font-size:11.8px;overflow-wrap:anywhere}\
 .intraop-node-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}\
 .intraop-node-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:11px;background:#13303d;border:1px solid #1f4a5c;color:#9ed1de;font-size:10.5px;font-weight:600;letter-spacing:.2px}\
 .intraop-node-chip.cat{background:#0e2a3a;border-color:#1d4658}\
@@ -110,7 +112,7 @@
 .intraop-node-chip.status-partial{background:#2b2310;border-color:#5a4818;color:#e2c97e}\
 .intraop-node-chip.status-wrong,.intraop-node-chip.status-breach{background:#3b1216;border-color:#7e2632;color:#f0a0aa}\
 .intraop-node-chip.hardstop{background:#3b1216;border-color:#7e2632;color:#f0a0aa}\
-.intraop-node-scroll{padding:12px 14px;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:#1f4a5c #0a1218}\
+.intraop-node-scroll{padding:12px 14px;overflow-y:auto;overflow-x:hidden;flex:1;scrollbar-width:thin;scrollbar-color:#1f4a5c #0a1218}\
 .intraop-node-scroll::-webkit-scrollbar{width:7px}\
 .intraop-node-scroll::-webkit-scrollbar-thumb{background:#1f4a5c;border-radius:4px}\
 .intraop-node-progress{display:flex;align-items:center;gap:8px;margin:0 0 10px}\
@@ -119,15 +121,15 @@
 .intraop-node-progress-text{font-size:11px;color:#9ed1de;font-weight:600;min-width:42px;text-align:right}\
 .intraop-node-section{margin:10px 0 8px}\
 .intraop-node-section-title{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:#6fa6b6;font-weight:700;margin-bottom:5px}\
-.intraop-node-role-box{background:#0e1f2a;border-left:3px solid #2a6275;padding:7px 10px;border-radius:4px;font-size:12px;color:#bfdde6}\
-.intraop-node-task-link{background:#0e2230;border:1px dashed #2a4c5c;padding:7px 10px;border-radius:5px;font-size:11.5px;color:#9ed1de}\
+.intraop-node-role-box{background:#0e1f2a;border-left:3px solid #2a6275;padding:7px 10px;border-radius:4px;font-size:12px;color:#bfdde6;overflow-wrap:anywhere}\
+.intraop-node-task-link{background:#0e2230;border:1px dashed #2a4c5c;padding:7px 10px;border-radius:5px;font-size:11.5px;color:#9ed1de;overflow-wrap:anywhere}\
 .intraop-node-task-link b{color:#cfe7ee}\
-.intraop-node-risk{padding:8px 10px;border-radius:5px;font-size:11.8px;line-height:1.45;border-left:3px solid #c0bd2b}\
+.intraop-node-risk{padding:8px 10px;border-radius:5px;font-size:11.8px;line-height:1.45;border-left:3px solid #c0bd2b;overflow-wrap:anywhere}\
 .intraop-node-risk.warning{background:rgba(192,189,43,.08);border-left-color:#c0bd2b;color:#e0dca0}\
 .intraop-node-risk.hardstop{background:rgba(192,57,43,.10);border-left-color:#c0392b;color:#f0b5b0}\
 .intraop-node-risk b{display:block;margin-bottom:2px;font-size:11px;letter-spacing:.4px;text-transform:uppercase}\
 .intraop-node-actions{display:flex;flex-direction:column;gap:5px}\
-.intraop-node-action-btn{display:block;width:100%;padding:11px 14px;background:linear-gradient(180deg,#16526b 0%,#0f3d52 100%);border:1px solid #2c6378;border-radius:7px;color:#e7f6fa;cursor:pointer;font-size:13px;font-weight:600;text-align:left;transition:all .15s;font-family:inherit;letter-spacing:.2px}\
+.intraop-node-action-btn{display:block;width:100%;padding:11px 14px;background:linear-gradient(180deg,#16526b 0%,#0f3d52 100%);border:1px solid #2c6378;border-radius:7px;color:#e7f6fa;cursor:pointer;font-size:13px;font-weight:600;text-align:left;transition:all .15s;font-family:inherit;letter-spacing:.2px;white-space:normal;overflow-wrap:anywhere}\
 .intraop-node-action-btn:hover{background:linear-gradient(180deg,#1d6985,#155067);border-color:#3a829c;box-shadow:0 2px 8px rgba(45,135,170,.25)}\
 .intraop-node-action-btn.primary{background:linear-gradient(180deg,#6b2247,#481730);border-color:#8e2f5f;color:#f6c8dc}\
 .intraop-node-action-btn.primary:hover{background:linear-gradient(180deg,#82295a,#5a1d3d);border-color:#a83a72}\
@@ -139,7 +141,7 @@
 .intraop-node-action-btn.hint:hover{background:linear-gradient(180deg,#36491b,#243314);border-color:#658528}\
 .intraop-node-mcq{background:#0e1f2a;border:1px solid #1c3a4a;border-radius:6px;padding:9px 10px}\
 .intraop-node-mcq-q{font-size:12.2px;color:#e7f6fa;font-weight:600;margin-bottom:6px;line-height:1.42}\
-.intraop-node-mcq-opt{display:block;width:100%;padding:7px 9px;margin:3px 0;background:#0a1822;border:1px solid #1f4a5c;border-radius:4px;color:#cfe7ee;cursor:pointer;font-size:11.8px;text-align:left;font-family:inherit;transition:all .15s}\
+.intraop-node-mcq-opt{display:block;width:100%;padding:7px 9px;margin:3px 0;background:#0a1822;border:1px solid #1f4a5c;border-radius:4px;color:#cfe7ee;cursor:pointer;font-size:11.8px;text-align:left;font-family:inherit;transition:all .15s;white-space:normal;overflow-wrap:anywhere}\
 .intraop-node-mcq-opt:hover{background:#13303d;border-color:#2c6378}\
 .intraop-node-mcq-opt.correct{background:#0e3320;border-color:#1c6841;color:#a0e6bd}\
 .intraop-node-mcq-opt.wrong{background:#3b1216;border-color:#7e2632;color:#f0a0aa}\
@@ -147,9 +149,9 @@
 .intraop-node-mcq-feedback{margin-top:6px;padding:6px 8px;border-radius:4px;font-size:11.5px;line-height:1.4}\
 .intraop-node-mcq-feedback.correct{background:rgba(63,196,128,.10);color:#a0e6bd}\
 .intraop-node-mcq-feedback.wrong{background:rgba(192,57,43,.10);color:#f0b5b0}\
-.intraop-node-map{background:#091621;border:1px solid #14323f;border-radius:5px;padding:8px 10px;font-size:11px;color:#8fb3bf;display:grid;grid-template-columns:auto 1fr;gap:3px 10px}\
+.intraop-node-map{background:#091621;border:1px solid #14323f;border-radius:5px;padding:8px 10px;font-size:11px;color:#8fb3bf;display:grid;grid-template-columns:minmax(92px,auto) minmax(0,1fr);gap:3px 10px;overflow:hidden}\
 .intraop-node-map dt{color:#6fa6b6;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:9.5px;align-self:center}\
-.intraop-node-map dd{margin:0;color:#cfe7ee;font-size:11px}\
+.intraop-node-map dd{margin:0;color:#cfe7ee;font-size:11px;min-width:0;overflow-wrap:anywhere;word-break:normal}\
 .intraop-node-stop-btn{margin-top:8px;padding:6px 10px;background:#0e2230;border:1px dashed #c0392b;border-radius:5px;color:#f0a0aa;cursor:pointer;font-size:11.5px;font-family:inherit;width:100%}\
 .intraop-node-stop-btn:hover{background:#2a1418}\
 ';
@@ -255,6 +257,11 @@
     var def = nd.def, st = nd.state;
     var host = document.getElementById('obj-popup');
     if (!host) return false;
+    host.classList.remove('ipv2-host');
+    host.classList.add('intraop-node-host');
+    host.style.width = 'min(520px, calc(100vw - 30px))';
+    host.style.maxWidth = 'calc(100vw - 30px)';
+    host.style.overflow = 'hidden';
 
     var status = st.status || 'pending';
     var breach = !!(st.barrierBreach || nd.snap.barrierBreach);

@@ -2139,7 +2139,9 @@
     s.id = 'intra-popups-v2-css';
     s.textContent = [
       /* ── Kart konteyner ── */
-      '.ipv2{font-family:inherit;color:var(--ink,#e8eef2);background:linear-gradient(180deg,rgba(10,24,38,.98),rgba(12,27,42,.98));border:1px solid rgba(92,196,214,.42);border-radius:14px;width:min(440px,calc(100vw - 30px));max-height:min(72dvh,640px);display:flex;flex-direction:column;box-shadow:0 18px 50px rgba(0,0,0,.45);overflow:hidden;font-size:12px;line-height:1.4}',
+      '#obj-popup.ipv2-host{width:min(520px,calc(100vw - 30px))!important;max-width:calc(100vw - 30px)!important;overflow:hidden!important}',
+      '.ipv2,.ipv2 *{box-sizing:border-box;max-width:100%}',
+      '.ipv2{font-family:inherit;color:var(--ink,#e8eef2);background:linear-gradient(180deg,rgba(10,24,38,.98),rgba(12,27,42,.98));border:1px solid rgba(92,196,214,.42);border-radius:14px;width:100%;min-width:0;max-height:min(72dvh,640px);display:flex;flex-direction:column;box-shadow:0 18px 50px rgba(0,0,0,.45);overflow:hidden;font-size:12px;line-height:1.4}',
       '.ipv2.hs-true{border-color:rgba(217,99,113,.55);box-shadow:0 0 0 1px rgba(217,99,113,.28) inset,0 18px 50px rgba(0,0,0,.45)}',
       '.ipv2.hs-cond{border-color:rgba(224,165,88,.50)}',
       '.ipv2.breach{border-color:rgba(217,99,113,.80);box-shadow:0 0 0 2px rgba(217,99,113,.30) inset,0 18px 50px rgba(0,0,0,.45)}',
@@ -2150,7 +2152,7 @@
       '.ipv2-cls:hover{color:var(--ink,#e8eef2)}',
       '.ipv2-t{font-size:13.5px;line-height:1.2;letter-spacing:.035em;color:var(--teal,#5cc4d6);font-weight:820;padding-right:22px;text-transform:uppercase;margin:0}',
       '.ipv2-st{margin-top:3px;color:var(--ink-mute,#86b1be);font-size:11px;line-height:1.34;font-weight:600}',
-      '.ipv2-d{margin-top:6px;color:var(--ink,#d8e6ec);font-size:11.5px;line-height:1.42;font-weight:500}',
+      '.ipv2-d{margin-top:6px;color:var(--ink,#d8e6ec);font-size:11.5px;line-height:1.42;font-weight:500;overflow-wrap:anywhere}',
       '.ipv2-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;align-items:center}',
       '.ipv2-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:rgba(92,196,214,.10);border:1px solid rgba(92,196,214,.24);color:var(--teal,#5cc4d6);font-size:9.8px;font-weight:720;letter-spacing:.02em;line-height:1;white-space:nowrap}',
       '.ipv2-chip.gckl{background:rgba(63,196,128,.10);border-color:rgba(63,196,128,.28);color:var(--green,#7fe2a3)}',
@@ -2178,17 +2180,17 @@
       '.ipv2-sec-t{font-size:9.8px;text-transform:uppercase;letter-spacing:.075em;color:var(--ink-mute,#7aabb8);font-weight:820;margin-bottom:5px}',
 
       /* ── Rol (teal kutu) ── */
-      '.ipv2-role{background:rgba(92,196,214,.07);border:1px solid rgba(92,196,214,.20);border-radius:11px;padding:8px 10px;font-size:11.5px;color:var(--ink,#cfe7ee);line-height:1.44}',
+      '.ipv2-role{background:rgba(92,196,214,.07);border:1px solid rgba(92,196,214,.20);border-radius:11px;padding:8px 10px;font-size:11.5px;color:var(--ink,#cfe7ee);line-height:1.44;overflow-wrap:anywhere}',
 
       /* ── Linked task & GCKL maddesi (dashed teal) ── */
-      '.ipv2-link{background:rgba(92,196,214,.05);border:1px dashed rgba(92,196,214,.28);padding:7px 10px;border-radius:11px;font-size:11px;color:var(--ink,#9ed1de);line-height:1.42}',
+      '.ipv2-link{background:rgba(92,196,214,.05);border:1px dashed rgba(92,196,214,.28);padding:7px 10px;border-radius:11px;font-size:11px;color:var(--ink,#9ed1de);line-height:1.42;overflow-wrap:anywhere}',
 
       /* ── KRİTİK HATA bölümü (kırmızı sol-bordürlü kutu) ── */
-      '.ipv2-warn{padding:8px 10px;border-radius:11px;font-size:11.2px;line-height:1.44;border-left:3px solid var(--amber,#e0a558);background:rgba(224,165,88,.08);color:var(--ink,#e0dca0);margin-bottom:5px}',
+      '.ipv2-warn{padding:8px 10px;border-radius:11px;font-size:11.2px;line-height:1.44;border-left:3px solid var(--amber,#e0a558);background:rgba(224,165,88,.08);color:var(--ink,#e0dca0);margin-bottom:5px;overflow-wrap:anywhere}',
       '.ipv2-warn.hs{border-left-color:var(--rose,#d96371);background:rgba(217,99,113,.10);color:#f0b5b0}',
       '.ipv2-warn b{display:block;margin-bottom:3px;font-size:9.8px;letter-spacing:.075em;text-transform:uppercase;color:inherit}',
-      '.ipv2-fail{padding:7px 10px;border-radius:11px;font-size:11px;background:rgba(217,99,113,.06);border-left:3px solid rgba(217,99,113,.55);color:#e0a8b3;margin-top:4px;line-height:1.4}',
-      '.ipv2-succ{padding:7px 10px;border-radius:11px;font-size:11px;background:rgba(63,196,128,.06);border-left:3px solid var(--green,#3fc480);color:var(--green,#7fe2a3);margin-top:4px;line-height:1.4}',
+      '.ipv2-fail{padding:7px 10px;border-radius:11px;font-size:11px;background:rgba(217,99,113,.06);border-left:3px solid rgba(217,99,113,.55);color:#e0a8b3;margin-top:4px;line-height:1.4;overflow-wrap:anywhere}',
+      '.ipv2-succ{padding:7px 10px;border-radius:11px;font-size:11px;background:rgba(63,196,128,.06);border-left:3px solid var(--green,#3fc480);color:var(--green,#7fe2a3);margin-top:4px;line-height:1.4;overflow-wrap:anywhere}',
       '.ipv2-fail b,.ipv2-succ b{display:inline;margin-right:3px;font-size:10px;text-transform:none;letter-spacing:.02em}',
 
       /* ── Prerequisite (ön koşul) ── */
@@ -2196,7 +2198,7 @@
       '.ipv2-prereq.ok{background:rgba(63,196,128,.07);border-color:rgba(63,196,128,.32);color:var(--green,#7fe2a3)}',
 
       /* ── Klinik not / kanıt ── */
-      '.ipv2-evid{font-size:10.5px;color:var(--ink-mute,#7aabb8);margin-top:7px;padding:7px 10px;background:rgba(255,255,255,.025);border-radius:11px;border-left:2px solid rgba(92,196,214,.32);line-height:1.46}',
+      '.ipv2-evid{font-size:10.5px;color:var(--ink-mute,#7aabb8);margin-top:7px;padding:7px 10px;background:rgba(255,255,255,.025);border-radius:11px;border-left:2px solid rgba(92,196,214,.32);line-height:1.46;overflow-wrap:anywhere}',
       '.ipv2-evid b{color:var(--teal,#86dac6);display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.075em;margin-bottom:3px;font-weight:820}',
       '.ipv2-evid div{margin-top:2px}',
 
@@ -2234,15 +2236,16 @@
       /* ── GCKL HARİTALAMA — kompakt tablo gibi grid ── */
       '.ipv2-map{font-size:10.4px;color:var(--ink-mute,#7aabb8);margin-top:10px;padding:10px 11px;background:rgba(255,255,255,.025);border:1px solid rgba(92,196,214,.18);border-radius:12px;line-height:1.5;display:block}',
       '.ipv2-map-t{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.075em;color:var(--teal,#86dac6);font-weight:820;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid rgba(92,196,214,.16)}',
-      '.ipv2-map-grid{display:grid;grid-template-columns:auto 1fr;gap:3px 9px}',
+      '.ipv2-map-grid{display:grid;grid-template-columns:minmax(92px,auto) minmax(0,1fr);gap:3px 9px}',
       '.ipv2-map-grid b{color:var(--ink-mute,#7aabb8);font-size:9.6px;text-transform:uppercase;letter-spacing:.045em;font-weight:720;align-self:start}',
-      '.ipv2-map-grid span{color:var(--ink,#cfe7ee);font-size:10.6px;font-weight:600;word-break:break-word}',
+      '.ipv2-map-grid span{color:var(--ink,#cfe7ee);font-size:10.6px;font-weight:600;min-width:0;overflow-wrap:anywhere;word-break:normal}',
       '.ipv2-map-grid span.hs-strict{color:#f0a0aa;font-weight:720}',
       '.ipv2-map-grid span.hs-cond{color:var(--amber,#e2c97e);font-weight:720}',
       '.ipv2-map-grid span.hs-none{color:var(--green,#7fe2a3);font-weight:600}',
       /* ── ADIM 11: Mobil / küçük ekran (spec madde 9) ── */
       '@media (max-width:640px){',
-      '  .ipv2{width:auto;max-width:none;max-height:min(82dvh,calc(100dvh - 80px));border-radius:14px 14px 0 0;font-size:11.5px}',
+      '  #obj-popup.ipv2-host{width:calc(100vw - 18px)!important;max-width:calc(100vw - 18px)!important}',
+      '  .ipv2{width:100%;max-width:none;max-height:min(82dvh,calc(100dvh - 80px));border-radius:14px 14px 0 0;font-size:11.5px}',
       '  .ipv2-h{padding:10px 12px 8px}',
       '  .ipv2-t{font-size:13px;padding-right:24px}',
       '  .ipv2-b{padding:10px 12px 12px}',
@@ -2569,11 +2572,16 @@
 
     host.innerHTML = h;
     host.style.display = 'block';
+    host.classList.remove('intraop-node-host');
+    host.classList.add('ipv2-host');
+    host.style.width = 'min(520px, calc(100vw - 30px))';
+    host.style.maxWidth = 'calc(100vw - 30px)';
+    host.style.overflow = 'hidden';
     host.classList.add('visible');
 
     // Konum
     if (typeof x === 'number' && typeof y === 'number') {
-      var w = 440, hH = 500;
+      var w = Math.min(520, window.innerWidth - 30), hH = 500;
       var px = Math.min(Math.max(10, x + 14), window.innerWidth - w - 10);
       var py = Math.min(Math.max(10, y + 14), window.innerHeight - hH - 10);
       host.style.left = px + 'px';
