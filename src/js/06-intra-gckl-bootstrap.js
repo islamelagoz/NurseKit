@@ -193,7 +193,19 @@
     if (taskIsComplete(entry.taskId)) return true;
     const task = currentIntraopTasks().find(function (t) { return t.id === entry.taskId; });
     if (!task) return false;
-    return markTaskCompleteFromEvidence(entry.taskId, sourceObj || null);
+    if (typeof window.completeTask !== 'function') return false;
+    try {
+      return !!window.completeTask(entry.taskId, sourceObj || {
+        label: entry.taskLabel,
+        opts: {
+          clinicalKey: (entry.linkedObjects || [])[0] || entry.id,
+          taskId: entry.taskId,
+          nodeId: entry.nodeId
+        }
+      });
+    } catch(e) {
+      return false;
+    }
   }
 
   function markEntryEvidence(entry) {

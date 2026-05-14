@@ -2295,6 +2295,16 @@
     return { ok: missing.length === 0, missing: missing };
   }
 
+  function evidenceLabelFor(card, ev) {
+    var sources = [];
+    if (card && Array.isArray(card.buttons)) sources = sources.concat(card.buttons);
+    if (card && Array.isArray(card.checklist)) sources = sources.concat(card.checklist);
+    for (var i = 0; i < sources.length; i++) {
+      if (sources[i] && sources[i].ev === ev && sources[i].label) return sources[i].label;
+    }
+    return String(ev || '').replace(/_/g, ' ');
+  }
+
   // =================================================================
   //  ADIM 3: refreshIntraopGcklViews(reason)
   //  Evidence/MCQ/stop sonrası tek state kaynağından (IntraopGCKL.compute)
@@ -2390,9 +2400,13 @@
       ? rawEv.reduce(function (acc, key) { acc[key] = true; return acc; }, {})
       : rawEv;
 
-    var validEvs = NODE_EV[nodeId] || [];
-    var doneCount = validEvs.reduce(function (a, e) { return a + (evState[e] ? 1 : 0); }, 0);
-    var pct = validEvs.length ? Math.round(doneCount / validEvs.length * 100) : 0;
+    var net = getNet();
+    var nodeDef = net && typeof net.getNode === 'function' ? net.getNode(nodeId) : null;
+    var requiredEvs = (nodeDef && Array.isArray(nodeDef.requiredEvidence) && nodeDef.requiredEvidence.length)
+      ? nodeDef.requiredEvidence.slice()
+      : (NODE_EV[nodeId] || []).slice();
+    var doneCount = requiredEvs.reduce(function (a, e) { return a + (evState[e] ? 1 : 0); }, 0);
+    var pct = requiredEvs.length ? Math.round(doneCount / requiredEvs.length * 100) : 0;
 
     var maxScore = NODE_SCORE[nodeId] || 0;
     var earned = (snap && snap.scoreEarned) || 0;
@@ -2425,10 +2439,10 @@
     h += '<div class="ipv2-b">';
 
     // Progress
-    if (validEvs.length) {
+    if (requiredEvs.length) {
       h += '<div class="ipv2-prog">';
       h += '<div class="ipv2-prog-bar"><div class="ipv2-prog-fill" style="width:' + pct + '%"></div></div>';
-      h += '<div class="ipv2-prog-txt">' + doneCount + '/' + validEvs.length + '</div>';
+      h += '<div class="ipv2-prog-txt">' + doneCount + '/' + requiredEvs.length + '</div>';
       h += '</div>';
     }
 
@@ -2535,14 +2549,16 @@
     }
 
     // Evidence Checklist (ek doğrulama listesi) — ADIM 8: spec madde 11 konumu
-    if (card.checklist && card.checklist.length) {
+    if (requiredEvs.length) {
       h += '<div class="ipv2-sec"><div class="ipv2-sec-t">Evidence Checklist</div>';
       h += '<div class="ipv2-actions">';
-      card.checklist.forEach(function (b) {
-        var done = !!evState[b.ev];
+      requiredEvs.forEach(function (evKey) {
+        var done = !!evState[evKey];
         var cls = 'ipv2-btn' + (done ? ' done' : '');
         var disabled = (!prereq.ok || done);
-        h += '<button class="' + cls + '" data-ev="' + esc(b.ev) + '"' + (disabled ? ' disabled' : '') + '>' + esc(b.label) + '</button>';
+        var label = evidenceLabelFor(card, evKey);
+        h += '<button class="' + cls + '" data-ev="' + esc(evKey) + '"' + (disabled ? ' disabled' : '') + '>' +
+          esc(done ? ('Doğrulandı · ' + label) : label) + '</button>';
       });
       h += '</div></div>';
     }
