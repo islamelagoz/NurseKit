@@ -21959,7 +21959,14 @@ function buildPostop() {
             roleCard.innerHTML = `<div class="phase-role-title"><strong>${roleModel.title}</strong><span>${App.currentRoom.toUpperCase()}</span></div><div class="phase-role-grid">${roleModel.actors.map(a => `<span class="role-mini ${a.cls}" title="${a.desc}">${a.name}</span>`).join('')}</div>`;
             list.appendChild(roleCard);
             if (App.currentRoom === 'intraop') list.appendChild(buildRoleFocusCard());
+            let lastTaskGroup = '';
             phase.tasks.forEach(t => { 
+                if (App.currentRoom === 'intraop' && t.group && t.group !== lastTaskGroup) {
+                    const gh = el('div', 'task-group-title', t.group);
+                    gh.style.cssText = 'margin:10px 0 5px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-mute,#7aabb8);';
+                    list.appendChild(gh);
+                    lastTaskGroup = t.group;
+                }
                 const done = App.completedTasks.includes(t.id);
                 const statusClass = done ? ' done' : (t.critical ? ' pending critical-pending' : ' pending');
                 const item = el('div', 'task-item' + statusClass);
@@ -21979,7 +21986,16 @@ function buildPostop() {
                 const stateMark = done ? '✓' : (t.critical ? '!' : '•');
                 const stateTitle = done ? 'Görev tamamlandı' : (t.critical ? 'Kritik görev bekliyor' : 'Görev bekliyor');
                 const checkClass = done ? 'state-done' : (t.critical ? 'state-critical' : 'state-pending');
-                item.innerHTML = `<div class="check ${checkClass}" title="${stateTitle}" aria-label="${stateTitle}">${stateMark}</div><div class="task-main"><div class="task-head"><div class="lbl">${t.label}</div><div class="badges">${badges.join('')}</div></div><div class="task-roleline">${role.detail}</div></div>`;
+                let substepHtml = '';
+                if (App.currentRoom === 'intraop' && Array.isArray(t.substeps) && t.substeps.length && window.IntraopGCKL) {
+                    try {
+                        const n = window.IntraopGCKL.getNode(t.linkedNode || t.gcklNode);
+                        const evidence = n?.evidenceCollected || {};
+                        const doneSteps = t.substeps.filter(s => evidence[s.id]).length;
+                        substepHtml = `<div class="task-substep-progress">${doneSteps}/${t.substeps.length} evidence</div>`;
+                    } catch(e) {}
+                }
+                item.innerHTML = `<div class="check ${checkClass}" title="${stateTitle}" aria-label="${stateTitle}">${stateMark}</div><div class="task-main"><div class="task-head"><div class="lbl">${t.taskTitle || t.label}</div><div class="badges">${badges.join('')}</div></div><div class="task-roleline">${t.taskText || role.detail}</div>${substepHtml}</div>`;
                 item.onclick = () => completeTask(t.id);
                 list.appendChild(item); 
             }); 
@@ -27924,7 +27940,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['patient','patient-wristband','patient-file','ssc-board-intraop','time-out'],
                 requiredEvidence:['identity_verbal','procedure_verbal','site_marking_visible'],
                 evidenceRule:'All identity/procedure/site evidence must be present before incision.',
-                phaseAdvancementImpact:'hardStop', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'hardStop', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_team_timeout',
@@ -27936,7 +27952,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['time-out','or-team-figures','surgical-team','anesthesia-machine'],
                 requiredEvidence:['team_attention'],
                 evidenceRule:'Formal time-out evidence is required before incision.',
-                phaseAdvancementImpact:'hardStop', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'hardStop', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_allergy_antibiotic',
@@ -27948,7 +27964,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['anesthesia-machine','antibiotic-syringe','medication-tray','patient-file'],
                 requiredEvidence:['antibiotic_time_verified','allergy_cross_checked'],
                 evidenceRule:'Allergy and prophylaxis evidence must both be present.',
-                phaseAdvancementImpact:'hardStop', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'hardStop', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_anaesthesia_safety',
@@ -27960,7 +27976,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['anesthesia-machine','monitor','pulse-oximeter','airway-cart','iv-pump-intraop'],
                 requiredEvidence:['airway_secured','spo2_reliable','critical_risks_shared'],
                 evidenceRule:'Airway, monitoring, and critical-risk evidence complete the task.',
-                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'scoreOnly', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_sterile_field',
@@ -27972,7 +27988,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['mayo-stand','mayo-table','sterile-drape','back-table','scrub-nurse'],
                 requiredEvidence:['sterile_field_intact','traffic_controlled'],
                 evidenceRule:'Sterile field and traffic-control evidence complete the task.',
-                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'scoreOnly', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_initial_count',
@@ -27984,7 +28000,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['count-board','scrub-nurse','circulating-nurse','mayo-stand'],
                 requiredEvidence:['count_initial'],
                 evidenceRule:'Initial instrument/sponge/sharp count evidence is required.',
-                phaseAdvancementImpact:'hardStop', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'hardStop', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_additional_count',
@@ -27996,7 +28012,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['count-board','circulating-nurse','instrument-tray','mayo-stand'],
                 requiredEvidence:['count_additional'],
                 evidenceRule:'Additional-material count update evidence completes the task.',
-                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'scoreOnly', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_final_count',
@@ -28008,7 +28024,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['count-board','closure-stage','scrub-nurse','circulating-nurse'],
                 requiredEvidence:['count_final'],
                 evidenceRule:'Final count evidence is required before closure/postop advancement.',
-                phaseAdvancementImpact:'hardStop', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'hardStop', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_specimen_safety',
@@ -28020,7 +28036,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['specimen-container','specimen-table','label','circulating-nurse'],
                 requiredEvidence:['specimen_labeled'],
                 evidenceRule:'Specimen label/handoff evidence completes the task.',
-                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'scoreOnly', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_equipment_fire_safety',
@@ -28032,7 +28048,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['esu-unit','esu-pad','suction-smoke','anesthesia-machine','antiseptic-bottle'],
                 requiredEvidence:['esu_pad_position','antiseptic_dry','fire_triangle_assessed'],
                 evidenceRule:'ESU, antiseptic dryness, and fire-triangle evidence complete the task.',
-                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'scoreOnly', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_cabg_cpb_safety',
@@ -28044,7 +28060,7 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['cpb-machine','perfusionist','perfusion-console','surgical-field'],
                 requiredEvidence:['cpb_machine_ready','perfusion_team_ready','heparin_act_plan_shared'],
                 evidenceRule:'CABG cases require CPB machine, perfusion team, and heparin/ACT plan evidence.',
-                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'scoreOnly', freeComplete:false, cardKey:'intraop-gckl'
             },
             {
                 id:'intraop_communication_handoff',
@@ -28056,9 +28072,23 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                 linkedObjects:['or-team-figures','time-out','circulating-nurse','surgeon'],
                 requiredEvidence:['roles_confirmed','closed_loop_confirmed'],
                 evidenceRule:'Role clarity and closed-loop communication evidence complete the task.',
-                phaseAdvancementImpact:'scoreOnly', freeComplete:true, cardKey:'intraop-gckl'
+                phaseAdvancementImpact:'scoreOnly', freeComplete:false, cardKey:'intraop-gckl'
             }
         ];
+        function intraopGcklTaskGroup(t) {
+            if (/final_count|specimen|communication_handoff/i.test(t.id || '') || t.gcklNode === 'signOutHandoff') {
+                return 'Kapanış / Sign-out Görevleri';
+            }
+            if (t.critical || t.phaseAdvancementImpact === 'hardStop') {
+                return 'Zorunlu Güvenlik Görevleri';
+            }
+            return 'İntraoperatif Bakım / Risk Yönetimi Görevleri';
+        }
+        function intraopGcklTaskSubsteps(t) {
+            return (t.requiredEvidence || []).map(function(ev) {
+                return { id: ev, label: ev.replace(/^count_/, 'count ').replace(/_/g, ' ') };
+            });
+        }
         const insertAfterHints = ['t_signout', 'ti_signout_full', 'ti_count', 'oti2_count', 'lti_count'];
         Object.keys(CASES).forEach(function(caseId){
             const c = CASES[caseId];
@@ -28082,7 +28112,16 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
                         const label = String(phase.tasks[i]?.label || '');
                         if (insertAfterHints.some(function(h){ return id.indexOf(h) !== -1; }) || /sign-out|sayım|numune/i.test(label)) { idx = i; break; }
                     }
-                    const clone = Object.assign({}, t, { group: 'İntraop GCKL Güvenlik Bariyerleri' });
+                    const clone = Object.assign({}, t, {
+                        group: t.group || intraopGcklTaskGroup(t),
+                        taskTitle: t.taskTitle || t.label,
+                        taskText: t.taskText || t.evidenceRule || t.label,
+                        linkedNode: t.linkedNode || t.gcklNode,
+                        linkedClinicalKey: t.linkedClinicalKey || (t.linkedObjects && t.linkedObjects[0]) || null,
+                        substeps: t.substeps || intraopGcklTaskSubsteps(t),
+                        categories: t.categories || ['patientSafety', 'checklistPerformance'],
+                        freeComplete: false
+                    });
                     if (idx >= 0) phase.tasks.splice(idx + 1, 0, clone); else phase.tasks.push(clone);
                 });
             });
@@ -28093,9 +28132,10 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
             tasksToAdd.forEach(function(t){
                 TASK_RULE_ENGINE.tasks[t.id] = Object.assign({}, TASK_RULE_ENGINE.tasks[t.id] || {}, {
                     phase:'intraop',
-                    freeComplete:true,
+                    freeComplete:false,
                     requiresPatientTalk:false,
                     requiresTeamTalk:false,
+                    requiresEvidence:true,
                     blocksPhaseAdvance:t.phaseAdvancementImpact === 'hardStop',
                     gcklNode:t.gcklNode,
                     gcklMapId:t.gcklMapId,

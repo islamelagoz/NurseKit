@@ -2015,6 +2015,113 @@
     return report;
   }
 
+  function validateIntraopParity() {
+    var net = window.IntraopGCKL || null;
+    var map = net && typeof net.getMap === 'function' ? net.getMap() : [];
+    var nodes = net && typeof net.getAll === 'function' ? net.getAll() : {};
+    var rows = [];
+    var report = {
+      missingCardNode: [],
+      invalidCardEvidence: [],
+      invalidTaskMapping: [],
+      orphanMapEntries: [],
+      hardStopWithoutGate: [],
+      duplicateRendererClinicalKeys: [],
+      legacyOnlyMappings: [],
+      cardSummary: rows
+    };
+
+    Object.keys(CARDS).forEach(function (clinicalKey) {
+      var card = CARDS[clinicalKey];
+      var node = nodes[card.node];
+      if (!node) report.missingCardNode.push({ clinicalKey: clinicalKey, node: card.node });
+      var validEv = node ? (node.requiredEvidence || []) : (NODE_EV[card.node] || []);
+      var cardEv = [];
+      (card.buttons || []).forEach(function (b) { if (b && b.ev) cardEv.push(b.ev); });
+      (card.checklist || []).forEach(function (b) { if (b && b.ev) cardEv.push(b.ev); });
+      cardEv.forEach(function (ev) {
+        if (validEv.indexOf(ev) < 0) {
+          report.invalidCardEvidence.push({ clinicalKey: clinicalKey, node: card.node, ev: ev, validEvidence: validEv.join(',') });
+        }
+      });
+      rows.push({
+        clinicalKey: clinicalKey,
+        node: card.node,
+        taskTag: card.taskTag || '',
+        evidence: cardEv.filter(function (ev, i, a) { return a.indexOf(ev) === i; }).join(','),
+        validNode: !!node,
+        status: node && cardEv.every(function (ev) { return validEv.indexOf(ev) >= 0; }) ? 'ok' : 'check'
+      });
+    });
+
+    map.forEach(function (entry) {
+      var node = nodes[entry.nodeId];
+      if (!node) report.orphanMapEntries.push({ mapId: entry.id, nodeId: entry.nodeId, reason: 'node missing' });
+      var req = node ? (node.requiredEvidence || []) : [];
+      (entry.requiredEvidence || []).forEach(function (ev) {
+        if (req.indexOf(ev) < 0) {
+          report.invalidTaskMapping.push({ mapId: entry.id, taskId: entry.taskId, nodeId: entry.nodeId, ev: ev, validEvidence: req.join(',') });
+        }
+      });
+      if (entry.hardStop && entry.phaseAdvancementImpact !== 'blocksPostop') {
+        report.hardStopWithoutGate.push({ mapId: entry.id, taskId: entry.taskId, nodeId: entry.nodeId, impact: entry.phaseAdvancementImpact });
+      }
+    });
+
+    Object.keys(nodes).forEach(function (nodeId) {
+      var node = nodes[nodeId];
+      if (!node || !node.hardStop) return;
+      var covered = map.some(function (entry) {
+        return entry.nodeId === nodeId && (entry.hardStop || entry.phaseAdvancementImpact === 'blocksPostop');
+      });
+      if (!covered) report.hardStopWithoutGate.push({ nodeId: nodeId, reason: 'hard-stop node has no blocking map entry' });
+    });
+
+    if (window.intraGcklLegacyTagMap) {
+      var nodeTags = (typeof LEGACY_NODE_TAGS !== 'undefined' && LEGACY_NODE_TAGS) || NODE_TAGS || {};
+      Object.keys(nodeTags).forEach(function (nodeId) {
+        var tags = nodeTags[nodeId] || [];
+        tags.forEach(function (tag) {
+          var covered = map.some(function (entry) {
+            return entry.taskId === tag || (entry.legacyTaskTags || []).indexOf(tag) >= 0;
+          });
+          if (!covered && !window.intraGcklLegacyTagMap[tag]) {
+            report.legacyOnlyMappings.push({ nodeId: nodeId, taskTag: tag });
+          }
+        });
+      });
+    }
+
+    if (window.renderIntraopGcklNodePopup && !window.__intraGcklPopupFallbackDelegates) {
+      Object.keys(CARDS).forEach(function (clinicalKey) {
+        report.duplicateRendererClinicalKeys.push({ clinicalKey: clinicalKey, primary: 'renderIntraProtocolCard', fallback: 'renderIntraopGcklNodePopup' });
+      });
+    }
+
+    try {
+      console.groupCollapsed('%c[INTRAOP PARITY] GCKL/card/task validation', 'color:#86dac6;font-weight:700');
+      if (console.table) console.table(rows);
+      ['missingCardNode','invalidCardEvidence','invalidTaskMapping','orphanMapEntries','hardStopWithoutGate','duplicateRendererClinicalKeys','legacyOnlyMappings'].forEach(function (key) {
+        if (report[key].length) {
+          console.warn(key + ':');
+          if (console.table) console.table(report[key]);
+        }
+      });
+      console.log('summary', {
+        cards: Object.keys(CARDS).length,
+        mapEntries: map.length,
+        missing: report.missingCardNode.length,
+        invalidEvidence: report.invalidCardEvidence.length,
+        invalidTaskMapping: report.invalidTaskMapping.length,
+        duplicateRenderers: report.duplicateRendererClinicalKeys.length
+      });
+      console.groupEnd();
+    } catch (e) {
+      console.warn('[INTRAOP PARITY] console report failed', e);
+    }
+    return report;
+  }
+
   // =================================================================
   //  CSS — ADIM 8: Preop NK136 kart diliyle görsel uyumlanma
   //  - kompakt fontlar (NK136: 12-15px paleti)
@@ -2558,6 +2665,12 @@
   window.resolveIntraCard = resolveCard;
   window.renderIntraProtocolCard = renderIntraProtocolCard;
   window.validateIntraPopups = validateIntraPopups;
+  window.validateIntraopParity = validateIntraopParity;
+  window.IntraPopups = window.IntraPopups || {};
+  window.IntraPopups.resolveIntraCard = resolveCard;
+  window.IntraPopups.renderIntraProtocolCard = renderIntraProtocolCard;
+  window.IntraPopups.validateIntraPopups = validateIntraPopups;
+  window.IntraPopups.validateIntraopParity = validateIntraopParity;
   window.__INTRA_POPUPS_V2_ACTIVE = true;
 
   // =================================================================
