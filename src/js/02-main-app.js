@@ -21949,6 +21949,44 @@ function buildPostop() {
             return box;
         }
 
+        function openIntraopTaskEvidencePopup(task, item, event) {
+            if (!task || App.currentRoom !== 'intraop') return false;
+            const mapEntry = window.IntraopGCKL?.getMapEntryByTask?.(task.id) || null;
+            const nodeId = task.linkedNode || task.gcklNode || mapEntry?.nodeId || null;
+            const clinicalKey = task.linkedClinicalKey
+                || (Array.isArray(task.linkedObjects) && task.linkedObjects[0])
+                || (Array.isArray(mapEntry?.linkedObjects) && mapEntry.linkedObjects[0])
+                || null;
+            if (!nodeId && !clinicalKey) return false;
+
+            const rect = item?.getBoundingClientRect?.();
+            const x = typeof event?.clientX === 'number' ? event.clientX : (rect ? rect.left + 18 : 24);
+            const y = typeof event?.clientY === 'number' ? event.clientY : (rect ? rect.top + 18 : 120);
+            const fakeObj = {
+                label: task.taskTitle || task.label,
+                clinicalKey,
+                opts: {
+                    clinicalKey,
+                    taskId: task.id,
+                    nodeId,
+                    requiredEvidence: mapEntry?.requiredEvidence || task.requiredEvidence || []
+                }
+            };
+
+            try {
+                if (clinicalKey && typeof window.showObjPopup === 'function') {
+                    window.showObjPopup(fakeObj, x, y);
+                    return true;
+                }
+                if (nodeId && typeof window.renderIntraopGcklNodePopup === 'function') {
+                    return !!window.renderIntraopGcklNodePopup(nodeId, fakeObj, x, y);
+                }
+            } catch(e) {
+                console.warn('[INTRAOP TASK POPUP] popup acilamadi', e);
+            }
+            return false;
+        }
+
         /* ===================== RIGHT PANEL ===================== */
         function renderRightPanel() { 
             const phase = App.currentPatient[App.currentRoom];
@@ -21967,7 +22005,18 @@ function buildPostop() {
                     list.appendChild(gh);
                     lastTaskGroup = t.group;
                 }
-                const done = App.completedTasks.includes(t.id);
+                let substepHtml = '';
+                let intraopEvidenceDone = null;
+                if (App.currentRoom === 'intraop' && Array.isArray(t.substeps) && t.substeps.length && window.IntraopGCKL) {
+                    try {
+                        const n = window.IntraopGCKL.getNode(t.linkedNode || t.gcklNode);
+                        const evidence = n?.evidenceCollected || {};
+                        const doneSteps = t.substeps.filter(s => evidence[s.id]).length;
+                        intraopEvidenceDone = doneSteps === t.substeps.length;
+                        substepHtml = `<div class="task-substep-progress">${doneSteps}/${t.substeps.length} evidence</div>`;
+                    } catch(e) {}
+                }
+                const done = intraopEvidenceDone == null ? App.completedTasks.includes(t.id) : intraopEvidenceDone;
                 const statusClass = done ? ' done' : (t.critical ? ' pending critical-pending' : ' pending');
                 const item = el('div', 'task-item' + statusClass);
                 const badges = []; 
@@ -21986,17 +22035,15 @@ function buildPostop() {
                 const stateMark = done ? '✓' : (t.critical ? '!' : '•');
                 const stateTitle = done ? 'Görev tamamlandı' : (t.critical ? 'Kritik görev bekliyor' : 'Görev bekliyor');
                 const checkClass = done ? 'state-done' : (t.critical ? 'state-critical' : 'state-pending');
-                let substepHtml = '';
-                if (App.currentRoom === 'intraop' && Array.isArray(t.substeps) && t.substeps.length && window.IntraopGCKL) {
-                    try {
-                        const n = window.IntraopGCKL.getNode(t.linkedNode || t.gcklNode);
-                        const evidence = n?.evidenceCollected || {};
-                        const doneSteps = t.substeps.filter(s => evidence[s.id]).length;
-                        substepHtml = `<div class="task-substep-progress">${doneSteps}/${t.substeps.length} evidence</div>`;
-                    } catch(e) {}
-                }
                 item.innerHTML = `<div class="check ${checkClass}" title="${stateTitle}" aria-label="${stateTitle}">${stateMark}</div><div class="task-main"><div class="task-head"><div class="lbl">${t.taskTitle || t.label}</div><div class="badges">${badges.join('')}</div></div><div class="task-roleline">${t.taskText || role.detail}</div>${substepHtml}</div>`;
-                item.onclick = () => completeTask(t.id);
+                item.onclick = (ev) => {
+                    if (App.currentRoom === 'intraop' && (t.gcklNode || t.linkedNode || t.gcklMapId || t.linkedClinicalKey)) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        if (openIntraopTaskEvidencePopup(t, item, ev)) return;
+                    }
+                    completeTask(t.id);
+                };
                 list.appendChild(item); 
             }); 
             const evArea = $('#event-card-area');
@@ -28085,6 +28132,11 @@ Eğitmen olarak yapıcı, kısa ve öğrenciyi düşündürmeye sevk eden yeni s
             return 'İntraoperatif Bakım / Risk Yönetimi Görevleri';
         }
         function intraopGcklTaskSubsteps(t) {
+            if (t.gcklNode === 'countSafety') {
+                return ['count_initial', 'count_additional', 'count_final'].map(function(ev) {
+                    return { id: ev, label: ev.replace(/^count_/, 'count ') };
+                });
+            }
             return (t.requiredEvidence || []).map(function(ev) {
                 return { id: ev, label: ev.replace(/^count_/, 'count ').replace(/_/g, ' ') };
             });
