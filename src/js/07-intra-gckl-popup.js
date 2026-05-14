@@ -236,6 +236,16 @@
 
   // ----- renderer -----
   function renderIntraopGcklNodePopup(nodeId, obj, x, y) {
+    var clinicalKey = (obj && obj.opts && obj.opts.clinicalKey) || (obj && obj.clinicalKey) || '';
+    if (clinicalKey && window.IntraPopups && typeof window.IntraPopups.resolveIntraCard === 'function' &&
+        typeof window.IntraPopups.renderIntraProtocolCard === 'function') {
+      var primaryCard = window.IntraPopups.resolveIntraCard(clinicalKey);
+      if (primaryCard) {
+        window.__intraGcklPopupFallbackDelegates = true;
+        return window.IntraPopups.renderIntraProtocolCard(primaryCard, clinicalKey, obj, x, y);
+      }
+    }
+    window.__intraGcklPopupFallbackDelegates = true;
     ensureCss();
     var nd = getNodeData(nodeId);
     if (!nd || !nd.def) {
@@ -260,8 +270,6 @@
 
     var maxScore = (def.scoreImpact && def.scoreImpact.correct) || def.weight || def.max || 0;
     var earned = st.scoreEarned || 0;
-
-    var clinicalKey = (obj && obj.opts && obj.opts.clinicalKey) || (obj && obj.clinicalKey) || '';
 
     // header
     var html = '<div class="intraop-node-popup' + (hardStop ? ' hardstop' : '') + (breach ? ' breach' : '') + '">';
@@ -483,6 +491,7 @@
     nodeForKey: getIntraopNodeByClinicalKey,
     map: K2N
   };
+  window.__intraGcklPopupFallbackDelegates = true;
   window.getIntraopNodeByClinicalKey = getIntraopNodeByClinicalKey;
   window.renderIntraopGcklNodePopup = renderIntraopGcklNodePopup;
 })();

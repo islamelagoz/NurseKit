@@ -28,7 +28,7 @@
   // Mevcut t_* tag'lerini intraop GCKL düğümlerine köprüler.
   // Bazı tag'ler birden fazla node'a (örn. equipment+antiseptic) ya da
   // tek node içinde belirli evidence'a (count_initial/final) gider.
-  const TAG_MAP = {
+  const LEGACY_TAG_MAP = {
     // GCKL ana akışı
     't_timeout':                { node: 'timeOutTeam' },
     'intraop_team_timeout':     { node: 'timeOutTeam', evidence: 'team_attention' },
@@ -70,12 +70,21 @@
   function mapForTag(tag) {
     const entry = mapEntryForTask(tag);
     if (entry) return { node: entry.nodeId, evidenceList: (entry.requiredEvidence || []).slice(), entry: entry };
-    return TAG_MAP[tag] || null;
+    return LEGACY_TAG_MAP[tag] || null;
   }
+  try { window.intraGcklLegacyTagMap = LEGACY_TAG_MAP; } catch(e) {}
 
   // === Kategori köprüsü (App.scores delta-push) ===
   // intraop ağ kategorileri → mevcut SCORE_CATEGORIES (varsa) ya da App.scoreCats
   const NODE_TO_APP_CATEGORIES = {
+    timeoutVerification:  ['patientSafety', 'checklistPerformance', 'communication'],
+    anesthesiaBlood:      ['clinicalAssessment', 'surgicalNursingKnowledge', 'patientSafety'],
+    sterileEquipPosition: ['patientSafety', 'clinicalAssessment', 'surgicalNursingKnowledge'],
+    countSpecimen:        ['patientSafety', 'checklistPerformance'],
+    signOutHandover:      ['communication', 'checklistPerformance', 'patientSafety'],
+    reasoningBonus:       ['clinicalReasoning']
+  };
+  const LEGACY_NODE_TO_APP_CATEGORIES = {
     timeoutVerification:  ['guvenlik', 'bilgi'],
     anesthesiaBlood:      ['klinik', 'guvenlik'],
     sterileEquipPosition: ['guvenlik', 'klinik'],
@@ -88,11 +97,11 @@
   const SYNCED = {};
   Object.keys(IG.getAll()).forEach(id => { SYNCED[id] = { earned: 0, lost: 0, bonus: 0 }; });
 
-  function addAppScore(cats, dE, dL, dB) {
+  function addAppScore(cats, dE, dL, dB, legacyCats) {
     if (!window.App) return;
     // NurseKit'in mevcut scoreCats yapısı
     if (window.App.scoreCats) {
-      cats.forEach(c => {
+      (legacyCats || []).forEach(c => {
         if (typeof window.App.scoreCats[c] === 'number') {
           window.App.scoreCats[c] += dE - dL + (dB || 0);
           window.App.scoreCatsTotal[c] = window.App.scoreCatsTotal[c] || 0;
@@ -117,11 +126,12 @@
     const earned = (typeof n.scoreEarned === 'number') ? n.scoreEarned : 0;
     const lost   = n.scoreLost || 0;
     const bonus  = n.bonusEarned || 0;
-    const cats = NODE_TO_APP_CATEGORIES[n.category] || ['guvenlik'];
+    const cats = NODE_TO_APP_CATEGORIES[n.category] || ['patientSafety'];
+    const legacyCats = LEGACY_NODE_TO_APP_CATEGORIES[n.category] || ['guvenlik'];
     const dE = earned - SYNCED[nodeId].earned;
     const dL = lost   - SYNCED[nodeId].lost;
     const dB = bonus  - SYNCED[nodeId].bonus;
-    addAppScore(cats, dE, dL, dB);
+    addAppScore(cats, dE, dL, dB, legacyCats);
     SYNCED[nodeId].earned = earned;
     SYNCED[nodeId].lost   = lost;
     SYNCED[nodeId].bonus  = bonus;
@@ -141,12 +151,15 @@
     return !!(window.App && Array.isArray(window.App.completedTasks) && window.App.completedTasks.indexOf(taskId) >= 0);
   }
 
-  function markTaskCompleteSilent(taskId, sourceObj) {
+  function markTaskCompleteFromEvidence(taskId, sourceObj) {
     if (!taskId || !window.App) return false;
     window.App.completedTasks = window.App.completedTasks || [];
     if (window.App.completedTasks.indexOf(taskId) < 0) window.App.completedTasks.push(taskId);
     try { if (window.NurseKitSM && window.NurseKitSM.shadowComplete) window.NurseKitSM.shadowComplete(taskId, sourceObj || null); } catch(e) {}
     return true;
+  }
+  function markTaskCompleteSilent(taskId, sourceObj) {
+    return markTaskCompleteFromEvidence(taskId, sourceObj);
   }
 
   function addGlobalGcklEvidence(entry, sourceLabel) {
@@ -163,7 +176,6 @@
         }
       } catch(e) {}
     });
-    (entry.gcklTaskIds || []).forEach(function (taskId) { markTaskCompleteSilent(taskId, null); });
   }
 
   function entryEvidenceMet(entry) {
@@ -174,20 +186,14 @@
     });
   }
 
-  function completeEntryTask(entry, sourceObj, silent) {
+  function completeEntryTask(entry, sourceObj) {
     if (!entry || !entry.taskId) return false;
     if (!entryEvidenceMet(entry)) return false;
     addGlobalGcklEvidence(entry, entry.taskLabel);
     if (taskIsComplete(entry.taskId)) return true;
     const task = currentIntraopTasks().find(function (t) { return t.id === entry.taskId; });
-    if (!task) return markTaskCompleteSilent(entry.taskId, sourceObj || null);
-    if (!silent && typeof window.completeTask === 'function') {
-      try {
-        const ok = window.completeTask(entry.taskId, sourceObj || { label: entry.taskLabel, opts: { clinicalKey: (entry.linkedObjects || [])[0] || entry.id } });
-        if (ok) return true;
-      } catch(e) {}
-    }
-    return markTaskCompleteSilent(entry.taskId, sourceObj || null);
+    if (!task) return false;
+    return markTaskCompleteFromEvidence(entry.taskId, sourceObj || null);
   }
 
   function markEntryEvidence(entry) {
@@ -229,8 +235,7 @@
     const m = mapForTag(tag);
     if (!m) return null;
     if (m.entry) {
-      markEntryEvidence(m.entry);
-      completeEntryTask(m.entry, null, true);
+      completeEntryTask(m.entry, null);
     } else if (m.evidenceList && m.evidenceList.length) {
       m.evidenceList.forEach(function (ev) { IG.completeNode(m.node, ev); });
     } else {
@@ -238,7 +243,7 @@
     }
     pushDelta(m.node);
     refreshAllIntraopViews('task:' + tag);
-    return { node: m.node, evidence: m.evidence || m.evidenceList || null };
+    return { node: m.node, evidence: m.evidence || m.evidenceList || null, evidenceComplete: m.entry ? entryEvidenceMet(m.entry) : true };
   };
 
   window.intraGcklOnEvidence = function (nodeId, evidenceKey, sourceObj) {
@@ -247,7 +252,7 @@
     const entries = IG.getMapEntriesByNodeEvidence
       ? IG.getMapEntriesByNodeEvidence(nodeId, evidenceKey)
       : [];
-    entries.forEach(function (entry) { completeEntryTask(entry, sourceObj || null, false); });
+    entries.forEach(function (entry) { completeEntryTask(entry, sourceObj || null); });
     pushDelta(nodeId);
     refreshAllIntraopViews('evidence:' + evidenceKey);
     return { node: nodeId, evidence: evidenceKey, entries: entries.map(function (e) { return e.id; }) };
@@ -321,6 +326,7 @@
   }
 
   function installAdvanceWrapper() {
+    if (typeof window.getPhaseAdvanceBlocker === 'function') return;
     if (typeof window.advancePhase !== 'function') {
       setTimeout(installAdvanceWrapper, 500);
       return;
@@ -357,10 +363,15 @@
     const original = window.switchRoom;
     window.switchRoom = function (rid) {
       if (window.App && window.App.currentRoom === 'intraop' && rid === 'postop' && window.NK_BYPASS_GATE !== true) {
-        const close = IG.canAdvancePostop ? IG.canAdvancePostop() : IG.canCloseSignout();
-        if (!close.ok) {
+        const blocker = (typeof window.getPhaseAdvanceBlocker === 'function')
+          ? window.getPhaseAdvanceBlocker('intraop')
+          : null;
+        const close = blocker ? null : (IG.canAdvancePostop ? IG.canAdvancePostop() : IG.canCloseSignout());
+        if (blocker || (close && !close.ok)) {
           const msg = 'Postopa gecis icin eksik intraop GCKL hard-stop: ' +
-            close.missing.map(m => m.label).join(', ');
+            (blocker && blocker.details && blocker.details.missing
+              ? blocker.details.missing.map(m => m.label).join(', ')
+              : close.missing.map(m => m.label).join(', '));
           try { if (typeof window.showSceneReaction === 'function') window.showSceneReaction(msg, 'warn'); } catch(e) {}
           try { if (typeof window.toast === 'function') window.toast('error', 'Postop gecisi kilitli', msg); } catch(e) {}
           return;
@@ -384,14 +395,24 @@
     window.__intraGcklCompleteWrapped = true;
     const original = window.completeTask;
     window.completeTask = function (taskId) {
+      const m = (window.App && window.App.currentRoom === 'intraop') ? mapForTag(taskId) : null;
+      if (m && m.entry && !entryEvidenceMet(m.entry)) {
+        const node = IG.getNode(m.entry.nodeId);
+        const missing = (m.entry.requiredEvidence || []).filter(function (ev) {
+          return !node || !node.evidenceCollected[ev];
+        });
+        const msg = 'Bu intraop GCKL gorevi evidence tamamlanmadan kapatilamaz: ' + missing.join(', ');
+        try { if (typeof window.showSceneReaction === 'function') window.showSceneReaction(msg, 'warn'); } catch(e) {}
+        try { if (typeof window.toast === 'function') window.toast('error', 'Evidence eksik', msg); } catch(e) {}
+        refreshAllIntraopViews('blockedCompleteTask:' + taskId);
+        return false;
+      }
       const result = original.apply(this, arguments);
       // Sadece intraop fazında ve harita tag'i varsa
       if (window.App && window.App.currentRoom === 'intraop') {
-        const m = mapForTag(taskId);
         if (m) {
           if (m.entry) {
-            markEntryEvidence(m.entry);
-            completeEntryTask(m.entry, arguments[1] || null, true);
+            completeEntryTask(m.entry, arguments[1] || null);
           } else if (m.evidenceList && m.evidenceList.length) {
             m.evidenceList.forEach(function (ev) { IG.completeNode(m.node, ev); });
           } else {
@@ -756,7 +777,8 @@
     const phase = window.App.currentPatient && window.App.currentPatient.intraop;
     if (!phase) return;
 
-    [].forEach.call(list.children, (item, i) => {
+    const taskItems = list.querySelectorAll('.task-item');
+    [].forEach.call(taskItems, (item, i) => {
       const t = phase.tasks[i];
       if (!t) return;
       const m = mapForTag(t.id);
@@ -823,7 +845,6 @@
     ensureAppAlias();
     injectChipStyles();
     installPhaseBlockerHook();
-    installAdvanceWrapper();
     installSwitchRoomWrapper();
     installCompleteTaskHook();
     installRightPanelHook();
