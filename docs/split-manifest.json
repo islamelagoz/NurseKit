@@ -1,0 +1,36 @@
+{
+  "entry_html": "index.html",
+  "css": [
+    { "file": "src/styles/nursekit.css" }
+  ],
+  "scripts": {
+    "head": [
+      { "order": 1, "file": "src/js/core/console-shim.js", "note": "must load before three.js" }
+    ],
+    "body": [
+      { "order":  2, "file": "src/js/core/main-app.js",                "role": "core",     "note": "monolith — to be decomposed" },
+      { "order":  3, "file": "src/js/phases/preop/gckl-network.js",    "role": "preop" },
+      { "order":  4, "file": "src/js/phases/preop/gckl-bootstrap.js",  "role": "preop" },
+      { "order":  5, "file": "src/js/phases/intraop/gckl-network.js",  "role": "intraop" },
+      { "order":  6, "file": "src/js/phases/intraop/gckl-bootstrap.js","role": "intraop" },
+      { "order":  7, "file": "src/js/phases/intraop/gckl-popup.js",    "role": "intraop" },
+      { "order":  8, "file": "src/js/phases/intraop/popups.js",        "role": "intraop" },
+      { "order":  9, "file": "src/js/phases/intraop/gckl-report.js",   "role": "intraop" },
+      { "order": 10, "file": "src/js/scoring/phase-scores.js",         "role": "scoring" },
+      { "order": 11, "file": "src/js/phases/preop/gckl-report.js",     "role": "preop",    "note": "depends on scoring" },
+      { "order": 12, "file": "src/js/phases/preop/osce-disabled.js",   "role": "preop" },
+      { "order": 13, "file": "src/js/patches/gckl-board-sync.js",      "role": "patch" },
+      { "order": 14, "file": "src/js/patches/gckl10-tasklist.js",      "role": "patch" }
+    ]
+  },
+  "third_party_cdn": [
+    "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+    "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js",
+    "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap"
+  ],
+  "next_steps": [
+    "Decompose core/main-app.js (~28k lines) into: patient/case data, screen state machine, 3D scene, audio/dialog engine, OSCE scoring.",
+    "If styles/nursekit.css grows, split into base/, components/, screens/.",
+    "Document each module's public window.* surface so dependencies become explicit."
+  ]
+}
